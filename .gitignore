@@ -1,0 +1,13 @@
+# Editor / tool settings
+.claude/
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Files exported from the app while testing
+doughlab-data.csv
+doughlab-scene.json

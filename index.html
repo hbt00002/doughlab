@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DoughLab</title>
+  <meta name="description" content="Oyun hamuruyla veri geometrisi: 3B hamur şekilleri yap, onlardan nokta bulutu (veri seti) üret.">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <aside class="sidebar">
+    <header class="brand">
+      <h1>DoughLab</h1>
+      <p>Oyun hamuruyla veri geometrisi</p>
+    </header>
+
+    <section class="panel">
+      <h2>Hamur ekle</h2>
+      <div class="shape-buttons" id="shape-buttons">
+        <button data-shape="ball"><span class="ico ico-ball"></span>Top</button>
+        <button data-shape="snake"><span class="ico ico-snake"></span>Yılan</button>
+        <button data-shape="slab"><span class="ico ico-slab"></span>Levha</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Hayalet veri</h2>
+      <p class="hint">Bir CSV yükle. Veri PCA ile 3B'ye indirgenip sahnede yarı saydam bir nokta bulutu olarak görünür. Modelini hamurla bunun üzerine kur.</p>
+      <div class="btn-row">
+        <button id="ghost-load">CSV yükle</button>
+        <button id="ghost-gapminder">Gapminder örneği</button>
+      </div>
+      <input type="file" id="ghost-file" accept=".csv,.tsv,.txt,text/csv" hidden>
+      <div id="ghost-settings"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Parçalar</h2>
+      <div id="piece-list" class="piece-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Seçili parça</h2>
+      <div id="props"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Veri</h2>
+      <div class="field">
+        <span class="field-head">Görünüm</span>
+        <div class="segmented" id="view-mode">
+          <button data-view="dough" class="active">Hamur</button>
+          <button data-view="both">Hamur + nokta</button>
+          <button data-view="points">Nokta</button>
+        </div>
+      </div>
+      <label class="field">
+        <span class="field-head">Nokta yoğunluğu <output id="density-value">60</output></span>
+        <input id="density" type="range" min="5" max="300" step="5" value="60">
+      </label>
+      <p class="hint">Her parça hacmiyle orantılı sayıda gözlem üretir. Doku arttıkça noktalar hamurun dışına saçılır (gürültü).</p>
+      <div class="btn-row">
+        <button id="btn-export" class="primary">CSV indir</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Sahne</h2>
+      <div class="btn-row">
+        <button id="btn-example">Örnek sahne</button>
+        <button id="btn-save">Kaydet</button>
+        <button id="btn-load">Aç</button>
+        <button id="btn-clear" class="danger">Temizle</button>
+      </div>
+      <input type="file" id="file-input" accept=".json,application/json" hidden>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <div id="viewport"></div>
+    <div class="toolbar" id="mode-buttons">
+      <button data-mode="translate" class="active" title="Kısayol: W">Taşı</button>
+      <button data-mode="rotate" title="Kısayol: E">Döndür</button>
+      <button data-mode="scale" title="Kısayol: R">Ölçekle</button>
+    </div>
+    <aside class="analysis" id="analysis">
+      <header class="analysis-head">
+        <h2>Analiz</h2>
+        <button id="analysis-toggle" title="Paneli daralt / genişlet">Gizle</button>
+      </header>
+      <div class="analysis-body" id="analysis-body">
+        <div class="segmented" id="analysis-scope">
+          <button data-scope="all" class="active">Tüm parçalar</button>
+          <button data-scope="selected">Seçili parça</button>
+        </div>
+        <div id="analysis-content"></div>
+      </div>
+    </aside>
+    <div class="tooltip" id="tooltip" hidden></div>
+    <div class="status" id="status"></div>
+    <div class="help">Tık: seç · Sürükle: kamerayı döndür · Sağ sürükle: kaydır · Tekerlek: yakınlaş · W/E/R: taşı/döndür/ölçekle · Del: sil · Ctrl+D: çoğalt</div>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

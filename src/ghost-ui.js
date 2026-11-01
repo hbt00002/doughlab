@@ -14,7 +14,17 @@ export const GAPMINDER_URL = 'https://raw.githubusercontent.com/plotly/datasets/
 export const GHOST_MAX_ROWS = 20000;
 export const ghost = new Ghost(scene);
 
-export function loadGhostTable(text, fileName) {
+// Called after any change to the ghost or its settings (autosave listens here)
+const ghostListeners = [];
+export function onGhostChange(fn) {
+  ghostListeners.push(fn);
+}
+function ghostChanged() {
+  for (const fn of ghostListeners) fn();
+}
+
+// source: 'gapminder' for the built-in sample, 'file' for the user's own CSV (never stored or shared)
+export function loadGhostTable(text, fileName, source = 'file') {
   const table = parseCSV(text);
   if (!table.header.length || !table.rows.length) throw keyedError('err.csvEmpty');
   const truncated = table.rows.length > GHOST_MAX_ROWS;
@@ -25,6 +35,7 @@ export function loadGhostTable(text, fileName) {
   Object.assign(ghostState, {
     table,
     fileName,
+    source,
     truncated,
     columnsInfo: info,
     columns: numeric.map((c) => c.index),
@@ -72,6 +83,7 @@ export function rebuildGhost() {
   }
   renderGhostSettings();
   updateGhostFit();
+  ghostChanged();
 }
 
 export function renderGhostSettings() {
@@ -117,10 +129,12 @@ export function renderGhostSettings() {
     checkbox(t('ghost.show'), s.visible, (v) => {
       s.visible = v;
       ghost.setVisible(v);
+      ghostChanged();
     }),
     checkbox(t('ghost.arrows'), s.arrows, (v) => {
       s.arrows = v;
       ghost.setArrowsVisible(v);
+      ghostChanged();
     }),
   );
 
@@ -238,23 +252,54 @@ export function removeGhost() {
   Object.assign(ghostState, { table: null, data: null });
   tooltip.hidden = true;
   renderGhostSettings();
+  ghostChanged();
 }
 
 export const gapminderButton = document.getElementById('ghost-gapminder');
 gapminderButton.addEventListener('click', loadGapminder);
 
-// Fetches the Gapminder sample and shows it as the ghost
+// Fetches the Gapminder sample and shows it as the ghost; resolves to true on success
 export async function loadGapminder() {
   gapminderButton.disabled = true;
   gapminderButton.textContent = t('ghost.loading');
   try {
     const res = await fetch(GAPMINDER_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    loadGhostTable(await res.text(), 'gapminderDataFiveYear.csv');
+    loadGhostTable(await res.text(), 'gapminderDataFiveYear.csv', 'gapminder');
+    return true;
   } catch (err) {
     alert(t('err.gapminder', { msg: errorText(err) }));
+    return false;
   } finally {
     gapminderButton.disabled = false;
     gapminderButton.textContent = t('ghost.gapminder');
   }
+}
+
+// The Gapminder ghost and its settings, by column name, for autosave and share links.
+// A ghost from the user's own CSV is never stored: the file may be large or private.
+export function ghostDescriptor() {
+  const s = ghostState;
+  if (!s.table || s.source !== 'gapminder') return null;
+  const name = (i) => s.table.header[i];
+  return {
+    source: 'gapminder',
+    columns: s.columns.map(name),
+    colorBy: s.colorBy >= 0 ? name(s.colorBy) : null,
+    standardize: s.standardize,
+    logSkewed: s.logSkewed,
+    visible: s.visible,
+    arrows: s.arrows,
+  };
+}
+
+export async function applyGhostDescriptor(d) {
+  if (d?.source !== 'gapminder' || !(await loadGapminder())) return;
+  const s = ghostState;
+  const index = (n) => s.table.header.indexOf(n);
+  const numeric = new Set(s.columnsInfo.filter((c) => c.numeric).map((c) => c.index));
+  if (Array.isArray(d.columns)) s.columns = d.columns.map(index).filter((i) => numeric.has(i));
+  s.colorBy = d.colorBy ? index(d.colorBy) : -1;
+  for (const k of ['standardize', 'logSkewed', 'visible', 'arrows']) if (typeof d[k] === 'boolean') s[k] = d[k];
+  rebuildGhost();
 }

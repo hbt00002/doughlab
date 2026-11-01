@@ -3,6 +3,7 @@ import { initTheme, cycleThemeMode, getThemeMode } from './theme.js';
 import { icon, renderIcons } from './icons.js';
 import { applySceneTheme } from './scene.js';
 import { recordChange, resetHistory, undo, redo } from './history-ui.js';
+import { restoreAutosave } from './autosave.js';
 import { isTouch, pieces, settings, analysisState } from './state.js';
 import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
@@ -215,4 +216,5 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 renderIcons();
 initTheme(applySceneTheme);
 applyLanguage();
+restoreAutosave();
 resetHistory();

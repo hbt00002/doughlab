@@ -15,6 +15,7 @@ export const STRINGS = {
     'top.more': 'Diğer seçenekler',
     'toast.undo': 'Geri alındı',
     'toast.redo': 'Yinelendi',
+    'toast.restored': 'Önceki çalışman geri yüklendi',
 
     'color.red': 'Kırmızı',
     'color.orange': 'Turuncu',
@@ -209,6 +210,7 @@ export const STRINGS = {
     'top.more': 'More options',
     'toast.undo': 'Undone',
     'toast.redo': 'Redone',
+    'toast.restored': 'Your previous work was restored',
 
     'color.red': 'Red',
     'color.orange': 'Orange',

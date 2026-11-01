@@ -17,6 +17,7 @@ export const analysisState = {
 export const ghostState = {
   table: null,
   fileName: '',
+  source: 'file',
   truncated: false,
   columnsInfo: [],
   columns: [],

@@ -202,7 +202,7 @@ densityInput.addEventListener('change', recordChange);
 
 document.getElementById('btn-undo').addEventListener('click', undo);
 document.getElementById('empty-ball').addEventListener('click', () => addPiece('ball'));
-document.getElementById('empty-gapminder').addEventListener('click', loadGapminder);
+document.getElementById('empty-gapminder').addEventListener('click', () => loadGapminder());
 document.getElementById('empty-example').addEventListener('click', () => {
   loadScene(exampleScene());
   recordChange();

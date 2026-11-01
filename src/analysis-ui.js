@@ -436,7 +436,10 @@ export function syncScopeButtons() {
   ghostButton.disabled = !ghostState.data;
   if (!ghostState.data && analysisState.scope === 'ghost') {
     analysisState.scope = 'all';
-    for (const o of document.querySelectorAll('#analysis-scope button')) o.classList.toggle('active', o.dataset.scope === 'all');
+    for (const o of document.querySelectorAll('#analysis-scope button')) {
+      o.classList.toggle('active', o.dataset.scope === 'all');
+      o.setAttribute('aria-checked', o.dataset.scope === 'all');
+    }
   }
   scheduleAnalysis();
 }

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Ghost, parseCSV, describeColumns, buildGhostData, fitScores } from './ghost.js';
 import { t, pct, errorText, keyedError } from './i18n.js';
 import { pieces, ghostState } from './state.js';
-import { el, selectField, withBold, checkbox } from './ui.js';
+import { el, selectField, withBold, checkbox, showToast } from './ui.js';
 import { viewport, renderer, scene, camera, orbit, gizmo, raycaster, rayFromEvent } from './scene.js';
 import { collectWorldPoints } from './analysis-ui.js';
 
@@ -256,10 +256,11 @@ export function removeGhost() {
 }
 
 export const gapminderButton = document.getElementById('ghost-gapminder');
-gapminderButton.addEventListener('click', loadGapminder);
+gapminderButton.addEventListener('click', () => loadGapminder());
 
-// Fetches the Gapminder sample and shows it as the ghost; resolves to true on success
-export async function loadGapminder() {
+// Fetches the Gapminder sample and shows it as the ghost; resolves to true on success.
+// silent: report a failure with a toast instead of a blocking alert (used when restoring at startup)
+export async function loadGapminder({ silent = false } = {}) {
   gapminderButton.disabled = true;
   gapminderButton.textContent = t('ghost.loading');
   try {
@@ -268,7 +269,9 @@ export async function loadGapminder() {
     loadGhostTable(await res.text(), 'gapminderDataFiveYear.csv', 'gapminder');
     return true;
   } catch (err) {
-    alert(t('err.gapminder', { msg: errorText(err) }));
+    const message = t('err.gapminder', { msg: errorText(err) });
+    if (silent) showToast(message);
+    else alert(message);
     return false;
   } finally {
     gapminderButton.disabled = false;
@@ -294,7 +297,7 @@ export function ghostDescriptor() {
 }
 
 export async function applyGhostDescriptor(d) {
-  if (d?.source !== 'gapminder' || !(await loadGapminder())) return;
+  if (d?.source !== 'gapminder' || !(await loadGapminder({ silent: true }))) return;
   const s = ghostState;
   const index = (n) => s.table.header.indexOf(n);
   const numeric = new Set(s.columnsInfo.filter((c) => c.numeric).map((c) => c.index));

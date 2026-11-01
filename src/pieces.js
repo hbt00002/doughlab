@@ -1,8 +1,9 @@
+import { normalizeScene } from './scene-data.js';
 import { recordChange } from './history-ui.js';
 import * as THREE from 'three';
 import { buildGeometry, pieceVolume } from './geometry.js';
 import { samplePiece } from './sampling.js';
-import { t, tAll, keyedError } from './i18n.js';
+import { t, tAll } from './i18n.js';
 import { pieces, typeCounters, settings, state } from './state.js';
 import { download } from './ui.js';
 import { scene } from './scene.js';
@@ -244,17 +245,12 @@ export function serializeScene() {
 }
 
 export function loadScene(data) {
-  if (data?.app !== 'doughlab' || !Array.isArray(data.pieces)) throw keyedError('err.notScene');
+  // Validate everything first: a broken file or link must leave the current scene untouched
+  const shapeParams = Object.fromEntries(Object.entries(SHAPES).map(([type, shape]) => [type, Object.keys(shape.params)]));
+  const scene = normalizeScene(data, shapeParams);
   clearScene();
-  if (typeof data.density === 'number') setDensity(data.density);
-  for (const d of data.pieces) {
-    if (!SHAPES[d.type]) continue;
-    const params = {};
-    for (const k of Object.keys(SHAPES[d.type].params)) {
-      if (typeof d.params?.[k] === 'number') params[k] = d.params[k];
-    }
-    createPiece(d.type, { ...d, params });
-  }
+  if (scene.density !== undefined) setDensity(scene.density);
+  for (const d of scene.pieces) createPiece(d.type, d);
   // New groups must not reuse an id from the file
   state.linkCounter = Math.max(0, ...pieces.map((p) => parseInt(p.link?.slice(1), 10) || 0));
   select(null);

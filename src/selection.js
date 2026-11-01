@@ -2,7 +2,7 @@ import { recordChange, undo, redo } from './history-ui.js';
 import * as THREE from 'three';
 import { t } from './i18n.js';
 import { pieces, analysisState, state } from './state.js';
-import { showToast } from './ui.js';
+import { showToast, isTextEntry } from './ui.js';
 import { viewport, renderer, scene, camera, orbit, gizmo, raycaster, rayFromEvent } from './scene.js';
 import { refreshPoints, removePiece, duplicatePiece } from './pieces.js';
 import { renderList, renderProps, updateStatus } from './panels.js';
@@ -234,7 +234,7 @@ window.addEventListener('keyup', (e) => {
 });
 
 window.addEventListener('keydown', (e) => {
-  if (e.target instanceof Element && e.target.closest('input, select, textarea')) return;
+  if (isTextEntry(e.target)) return;
   if (nudge(e)) return;
   const k = e.key.toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;

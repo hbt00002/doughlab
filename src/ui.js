@@ -102,3 +102,12 @@ export function showLinkDialog(url) {
   input.focus();
   input.select();
 }
+
+// True where the browser's own editing keys (Ctrl+Z, Delete, letters) belong to the field.
+// Sliders, selects, checkboxes and colour pickers have no text undo, so app shortcuts stay on there.
+const TEXT_INPUT_TYPES = new Set(['', 'text', 'number', 'search', 'url', 'email', 'tel', 'password']);
+export function isTextEntry(target) {
+  if (!target) return false;
+  if (target.isContentEditable || target.tagName === 'TEXTAREA') return true;
+  return target.tagName === 'INPUT' && TEXT_INPUT_TYPES.has((target.type ?? '').toLowerCase());
+}

@@ -1,3 +1,4 @@
+import { recordChange, undo, redo } from './history-ui.js';
 import * as THREE from 'three';
 import { t } from './i18n.js';
 import { pieces, analysisState, state } from './state.js';
@@ -12,6 +13,7 @@ gizmo.addEventListener('dragging-changed', (e) => {
   orbit.enabled = !e.value;
   // Scaling changes the volume, so the observation count has to be recomputed
   if (!e.value && state.selection.length) {
+    recordChange();
     state.selection.forEach(refreshPoints);
     if (gizmo.object === pivot) capturePivot();
     renderList();
@@ -112,6 +114,7 @@ export function groupSelection() {
   renderList();
   renderProps();
   scheduleAnalysis();
+  recordChange();
 }
 
 // Ctrl+Shift+G: the pieces move on their own again; their group names stay
@@ -121,10 +124,12 @@ export function ungroupSelection() {
   showToast(t('toast.ungrouped'));
   renderList();
   renderProps();
+  recordChange();
 }
 
 export function deleteSelection() {
   for (const p of [...state.selection]) removePiece(p);
+  recordChange();
 }
 
 export function setMode(mode) {
@@ -210,7 +215,14 @@ window.addEventListener('keydown', (e) => {
   if (e.target instanceof Element && e.target.closest('input, select, textarea')) return;
   const k = e.key.toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;
-  if (k === 'd' && ctrl) {
+  if (k === 'z' && ctrl) {
+    e.preventDefault();
+    if (e.shiftKey) redo();
+    else undo();
+  } else if (k === 'y' && ctrl) {
+    e.preventDefault();
+    redo();
+  } else if (k === 'd' && ctrl) {
     e.preventDefault();
     duplicateSelected();
   } else if (k === 'g' && ctrl) {
@@ -239,4 +251,5 @@ export function duplicateSelected() {
   });
   setSelection(copies);
   updateStatus();
+  recordChange();
 }

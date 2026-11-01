@@ -2,6 +2,7 @@ import { t, setLang, getLang, errorText } from './i18n.js';
 import { initTheme, cycleThemeMode, getThemeMode } from './theme.js';
 import { icon, renderIcons } from './icons.js';
 import { applySceneTheme } from './scene.js';
+import { recordChange, resetHistory, undo, redo } from './history-ui.js';
 import { isTouch, pieces, settings, analysisState } from './state.js';
 import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
@@ -162,6 +163,10 @@ densityInput.addEventListener('input', () => {
   renderList();
   updateStatus();
 });
+densityInput.addEventListener('change', recordChange);
+
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-redo').addEventListener('click', redo);
 
 for (const b of document.querySelectorAll('#shape-buttons button')) {
   b.addEventListener('click', () => addPiece(b.dataset.shape));
@@ -189,6 +194,7 @@ fileInput.addEventListener('change', async () => {
   if (!file) return;
   try {
     loadScene(JSON.parse(await file.text()));
+    recordChange();
   } catch (err) {
     alert(t('err.sceneOpen', { msg: errorText(err) }));
   }
@@ -196,14 +202,17 @@ fileInput.addEventListener('change', async () => {
 document.getElementById('btn-example').addEventListener('click', () => {
   if (pieces.length && !confirm(t('confirm.example'))) return;
   loadScene(exampleScene());
+  recordChange();
 });
 document.getElementById('btn-clear').addEventListener('click', () => {
   if (pieces.length && confirm(t('confirm.clear'))) {
     clearScene();
     updateStatus();
+    recordChange();
   }
 });
 
 renderIcons();
 initTheme(applySceneTheme);
 applyLanguage();
+resetHistory();

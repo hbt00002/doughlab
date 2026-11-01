@@ -1,3 +1,4 @@
+import { recordChange } from './history-ui.js';
 import * as THREE from 'three';
 import { buildGeometry, pieceVolume } from './geometry.js';
 import { samplePiece } from './sampling.js';
@@ -192,6 +193,7 @@ export function addPiece(type) {
   setMode('translate');
   select(piece);
   updateStatus();
+  recordChange();
 }
 
 export function clearScene() {

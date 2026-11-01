@@ -1,3 +1,4 @@
+import { recordChange } from './history-ui.js';
 import { t } from './i18n.js';
 import { pieces, state } from './state.js';
 import { el, slider, textField, selectField } from './ui.js';
@@ -8,6 +9,10 @@ import { scheduleAnalysis } from './analysis-ui.js';
 // ---------------------------------------------------------------------------
 // Panels
 // ---------------------------------------------------------------------------
+
+// Every committed edit in the properties panel is one undo step: `change` fires when a slider is
+// released, a text field loses focus, or a select / colour picker settles
+document.getElementById('props').addEventListener('change', () => recordChange());
 
 export function renderList() {
   const list = document.getElementById('piece-list');
@@ -112,7 +117,10 @@ export function renderProps() {
   for (const c of COLORS) {
     const s = el('button', { class: 'swatch' + (c.hex === p.color ? ' active' : ''), title: t(`color.${c.key}`), 'data-hex': c.hex });
     s.style.background = c.hex;
-    s.addEventListener('click', () => setColor(c.hex));
+    s.addEventListener('click', () => {
+      setColor(c.hex);
+      recordChange();
+    });
     swatches.append(s);
   }
   const custom = el('input', { type: 'color', value: p.color, title: t('props.customColor') });
@@ -143,7 +151,7 @@ export function renderProps() {
   const dup = el('button', {}, t('tool.duplicate'));
   dup.addEventListener('click', duplicateSelected);
   const del = el('button', { class: 'danger' }, t('tool.delete'));
-  del.addEventListener('click', () => removePiece(p));
+  del.addEventListener('click', deleteSelection);
   box.append(el('div', { class: 'btn-row' }, dup, del));
 }
 

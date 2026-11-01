@@ -13,6 +13,8 @@ export const STRINGS = {
     'top.redo': 'Yinele',
     'top.share': 'Paylaş',
     'top.more': 'Diğer seçenekler',
+    'toast.undo': 'Geri alındı',
+    'toast.redo': 'Yinelendi',
 
     'color.red': 'Kırmızı',
     'color.orange': 'Turuncu',
@@ -205,6 +207,8 @@ export const STRINGS = {
     'top.redo': 'Redo',
     'top.share': 'Share',
     'top.more': 'More options',
+    'toast.undo': 'Undone',
+    'toast.redo': 'Redone',
 
     'color.red': 'Red',
     'color.orange': 'Orange',

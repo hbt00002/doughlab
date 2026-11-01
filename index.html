@@ -6,35 +6,35 @@
   <title>DoughLab</title>
   <meta name="description" content="Oyun hamuruyla veri geometrisi: 3B hamur şekilleri yap, onlardan nokta bulutu (veri seti) üret.">
   <link rel="preload" href="fonts/Lexend-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=d0780d2a45">
+  <link rel="stylesheet" href="style.css?v=0d0aec9ed3">
   <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-        "./src/analysis-ui.js": "./src/analysis-ui.js?v=d0780d2a45",
-        "./src/analysis.js": "./src/analysis.js?v=d0780d2a45",
-        "./src/arrows.js": "./src/arrows.js?v=d0780d2a45",
-        "./src/autosave.js": "./src/autosave.js?v=d0780d2a45",
-        "./src/geometry.js": "./src/geometry.js?v=d0780d2a45",
-        "./src/ghost-data.js": "./src/ghost-data.js?v=d0780d2a45",
-        "./src/ghost-ui.js": "./src/ghost-ui.js?v=d0780d2a45",
-        "./src/ghost.js": "./src/ghost.js?v=d0780d2a45",
-        "./src/history-ui.js": "./src/history-ui.js?v=d0780d2a45",
-        "./src/history.js": "./src/history.js?v=d0780d2a45",
-        "./src/i18n.js": "./src/i18n.js?v=d0780d2a45",
-        "./src/icons.js": "./src/icons.js?v=d0780d2a45",
-        "./src/main.js": "./src/main.js?v=d0780d2a45",
-        "./src/panels.js": "./src/panels.js?v=d0780d2a45",
-        "./src/pieces.js": "./src/pieces.js?v=d0780d2a45",
-        "./src/sampling.js": "./src/sampling.js?v=d0780d2a45",
-        "./src/scene.js": "./src/scene.js?v=d0780d2a45",
-        "./src/selection.js": "./src/selection.js?v=d0780d2a45",
-        "./src/share.js": "./src/share.js?v=d0780d2a45",
-        "./src/state.js": "./src/state.js?v=d0780d2a45",
-        "./src/storage.js": "./src/storage.js?v=d0780d2a45",
-        "./src/theme.js": "./src/theme.js?v=d0780d2a45",
-        "./src/ui.js": "./src/ui.js?v=d0780d2a45"
+        "./src/analysis-ui.js": "./src/analysis-ui.js?v=0d0aec9ed3",
+        "./src/analysis.js": "./src/analysis.js?v=0d0aec9ed3",
+        "./src/arrows.js": "./src/arrows.js?v=0d0aec9ed3",
+        "./src/autosave.js": "./src/autosave.js?v=0d0aec9ed3",
+        "./src/geometry.js": "./src/geometry.js?v=0d0aec9ed3",
+        "./src/ghost-data.js": "./src/ghost-data.js?v=0d0aec9ed3",
+        "./src/ghost-ui.js": "./src/ghost-ui.js?v=0d0aec9ed3",
+        "./src/ghost.js": "./src/ghost.js?v=0d0aec9ed3",
+        "./src/history-ui.js": "./src/history-ui.js?v=0d0aec9ed3",
+        "./src/history.js": "./src/history.js?v=0d0aec9ed3",
+        "./src/i18n.js": "./src/i18n.js?v=0d0aec9ed3",
+        "./src/icons.js": "./src/icons.js?v=0d0aec9ed3",
+        "./src/main.js": "./src/main.js?v=0d0aec9ed3",
+        "./src/panels.js": "./src/panels.js?v=0d0aec9ed3",
+        "./src/pieces.js": "./src/pieces.js?v=0d0aec9ed3",
+        "./src/sampling.js": "./src/sampling.js?v=0d0aec9ed3",
+        "./src/scene.js": "./src/scene.js?v=0d0aec9ed3",
+        "./src/selection.js": "./src/selection.js?v=0d0aec9ed3",
+        "./src/share.js": "./src/share.js?v=0d0aec9ed3",
+        "./src/state.js": "./src/state.js?v=0d0aec9ed3",
+        "./src/storage.js": "./src/storage.js?v=0d0aec9ed3",
+        "./src/theme.js": "./src/theme.js?v=0d0aec9ed3",
+        "./src/ui.js": "./src/ui.js?v=0d0aec9ed3"
       }
     }
   </script>
@@ -146,22 +146,22 @@
         <button id="analysis-toggle" data-i18n-title="analysis.toggle" aria-controls="analysis-body" aria-expanded="true">Gizle</button>
       </header>
       <div class="analysis-body" id="analysis-body">
-        <div class="tabs" id="analysis-tabs" role="tablist">
-          <button data-tab="pca" class="active" role="tab" data-i18n="tab.pca">PCA</button>
-          <button data-tab="regression" role="tab" data-i18n="tab.regression">Regresyon</button>
-          <button data-tab="shadow" role="tab" data-i18n="tab.shadow">Gölge</button>
+        <div class="tabs" id="analysis-tabs" role="tablist" data-i18n-aria="a11y.tabs">
+          <button id="tab-pca" data-tab="pca" class="active" role="tab" aria-selected="true" aria-controls="pane-pca" data-i18n="tab.pca">PCA</button>
+          <button id="tab-regression" data-tab="regression" role="tab" aria-selected="false" aria-controls="pane-regression" tabindex="-1" data-i18n="tab.regression">Regresyon</button>
+          <button id="tab-shadow" data-tab="shadow" role="tab" aria-selected="false" aria-controls="pane-shadow" tabindex="-1" data-i18n="tab.shadow">Gölge</button>
         </div>
-        <div class="segmented" id="analysis-scope">
-          <button data-scope="all" class="active" data-i18n="scope.all">Tüm parçalar</button>
-          <button data-scope="selected" data-i18n="scope.selected">Seçili parça</button>
-          <button data-scope="ghost" data-i18n="scope.ghost" disabled>Hayalet veri</button>
+        <div class="segmented" id="analysis-scope" role="radiogroup" data-i18n-aria="a11y.scope">
+          <button data-scope="all" class="active" role="radio" aria-checked="true" data-i18n="scope.all">Tüm parçalar</button>
+          <button data-scope="selected" role="radio" aria-checked="false" data-i18n="scope.selected">Seçili parça</button>
+          <button data-scope="ghost" role="radio" aria-checked="false" data-i18n="scope.ghost" disabled>Hayalet veri</button>
         </div>
 
-        <div class="tab-pane" data-pane="pca">
+        <div class="tab-pane" id="pane-pca" data-pane="pca" role="tabpanel" aria-labelledby="tab-pca">
           <div id="analysis-content"></div>
         </div>
 
-        <div class="tab-pane" data-pane="regression" hidden>
+        <div class="tab-pane" id="pane-regression" data-pane="regression" role="tabpanel" aria-labelledby="tab-regression" hidden>
           <div id="reg-dough-controls">
           <label class="field">
             <span class="field-head" data-i18n="reg.target">Hedef (bağımlı) eksen</span>
@@ -176,7 +176,7 @@
           <div id="regression-content"></div>
         </div>
 
-        <div class="tab-pane" data-pane="shadow" hidden>
+        <div class="tab-pane" id="pane-shadow" data-pane="shadow" role="tabpanel" aria-labelledby="tab-shadow" hidden>
           <p class="note" data-i18n="shadow.intro"></p>
           <label class="field">
             <span class="field-head"><span data-i18n="shadow.azimuth">Işık yönü</span> <output id="shadow-azimuth-value"></output></span>
@@ -207,10 +207,12 @@
     <div class="marquee" id="marquee" hidden></div>
     <div class="toast" id="toast" role="status" hidden></div>
     <div class="tooltip" id="tooltip" hidden></div>
+    <p class="visually-hidden" id="scene-summary"></p>
+    <div class="visually-hidden" id="live" aria-live="polite"></div>
     <div class="status" id="status"></div>
     <div class="help" id="help"></div>
   </main>
 
-  <script type="module" src="src/main.js?v=d0780d2a45"></script>
+  <script type="module" src="src/main.js?v=0d0aec9ed3"></script>
 </body>
 </html>

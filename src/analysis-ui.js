@@ -4,7 +4,7 @@ import { pca, pearson, spearman, kendall, etaSquared, linearRegression, regressO
 import { makeArrow, placeArrow, disposeArrow } from './arrows.js';
 import { t, pct } from './i18n.js';
 import { pieces, analysisState, state, ghostState } from './state.js';
-import { el } from './ui.js';
+import { el, announce } from './ui.js';
 import { scene, SUN_HOME, sun, onSceneTheme } from './scene.js';
 import { updateGhostFit } from './ghost-ui.js';
 
@@ -205,6 +205,7 @@ export function runAnalysis() {
   if (tab === 'pca') onGhost ? renderGhostPcaTab(box, data.ghost) : renderPcaTab(box, data, fit);
   else if (tab === 'regression') onGhost ? renderGhostRegressionTab(box, data) : renderRegressionTab(box, data);
   else renderShadowTab(box, data, fit);
+  announceSummary(tab, data, fit);
 }
 
 export function updatePcaAxes(fit) {
@@ -549,4 +550,30 @@ export function lightAlongPC(index) {
   const data = collectData();
   if (emptyMessage(data)) return;
   setLightDirection(pca(data.cols).components[index].vector);
+}
+
+// Screen readers hear one sentence about the current result, not every intermediate update
+let lastSpoken = 0;
+let spokenTimer = null;
+const plain = (html) => html.replace(/<[^>]+>/g, '');
+function announceSummary(tab, data, fit) {
+  let text;
+  if (tab === 'pca') {
+    const r = data.ghost ? data.ghost.ratios : fit.components.map((c) => c.ratio);
+    text = t('a11y.pca', { pc1: pct(r[0]), pc2: pct(r[1]), verdict: plain(shapeVerdict(r[0], r[1])).split(':')[0] });
+  } else if (tab === 'shadow') {
+    const best = fit.components[0].ratio + fit.components[1].ratio;
+    const d = lightDirection();
+    text = t('a11y.shadow', { kept: pct(projectedVarianceRatio(data.cols, [d.x, d.y, d.z])), best: pct(best) });
+  } else {
+    const r2 = document.querySelector('#regression-content .fit-row b');
+    text = r2 ? t('a11y.reg', { r2: r2.textContent }) : '';
+  }
+  if (!text) return;
+  clearTimeout(spokenTimer);
+  const wait = Math.max(0, 1500 - (Date.now() - lastSpoken));
+  spokenTimer = setTimeout(() => {
+    lastSpoken = Date.now();
+    announce(text);
+  }, wait);
 }

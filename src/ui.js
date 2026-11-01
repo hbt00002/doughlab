@@ -1,6 +1,16 @@
 import { t } from './i18n.js';
 
+// Polite screen-reader announcement
+export function announce(text) {
+  const live = document.getElementById('live');
+  // Clearing first makes a repeated message be read again
+  live.textContent = '';
+  // A timer, not requestAnimationFrame: frames don't run while the tab is in the background
+  setTimeout(() => (live.textContent = text), 50);
+}
+
 export function showToast(text) {
+  announce(text);
   const toast = document.getElementById('toast');
   toast.textContent = text;
   toast.hidden = false;

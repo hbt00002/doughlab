@@ -111,11 +111,14 @@ export function renderProps() {
     }
     p.color = hex;
     updateMaterial(p);
-    for (const s of swatches.querySelectorAll('.swatch')) s.classList.toggle('active', s.dataset.hex === hex);
+    for (const s of swatches.querySelectorAll('.swatch')) {
+      s.classList.toggle('active', s.dataset.hex === hex);
+      s.setAttribute('aria-pressed', s.dataset.hex === hex);
+    }
     renderList();
   };
   for (const c of COLORS) {
-    const s = el('button', { class: 'swatch' + (c.hex === p.color ? ' active' : ''), title: t(`color.${c.key}`), 'data-hex': c.hex });
+    const s = el('button', { class: 'swatch' + (c.hex === p.color ? ' active' : ''), title: t(`color.${c.key}`), 'aria-label': t(`color.${c.key}`), 'aria-pressed': c.hex === p.color, 'data-hex': c.hex });
     s.style.background = c.hex;
     s.addEventListener('click', () => {
       setColor(c.hex);
@@ -123,7 +126,7 @@ export function renderProps() {
     });
     swatches.append(s);
   }
-  const custom = el('input', { type: 'color', value: p.color, title: t('props.customColor') });
+  const custom = el('input', { type: 'color', value: p.color, title: t('props.customColor'), 'aria-label': t('props.customColor') });
   custom.addEventListener('input', () => setColor(custom.value));
   swatches.append(custom);
 
@@ -148,6 +151,8 @@ export function renderProps() {
     }),
   );
 
+  box.append(transformFields(p));
+
   const dup = el('button', {}, t('tool.duplicate'));
   dup.addEventListener('click', duplicateSelected);
   const del = el('button', { class: 'danger' }, t('tool.delete'));
@@ -164,4 +169,36 @@ export function updateStatus() {
   updateEmptyCard();
   const total = pieces.reduce((n, p) => n + p.count, 0);
   document.getElementById('status').textContent = t(pieces.length === 1 ? 'status.one' : 'status', { pieces: pieces.length, points: total });
+  document.getElementById('scene-summary').textContent = t('a11y.summary', { pieces: pieces.length, points: total });
+}
+
+// Exact position / rotation / scale, so pieces can be placed without a mouse
+function transformFields(p) {
+  const m = p.mesh;
+  const rows = [
+    ['props.position', 'position', 0.1, (v) => v, (v) => v],
+    ['props.rotation', 'rotation', 1, (v) => (v * 180) / Math.PI, (v) => (v * Math.PI) / 180],
+    ['props.scale', 'scale', 0.1, (v) => v, (v) => v],
+  ];
+  const fieldset = el('fieldset', { class: 'transform' }, el('legend', {}, t('props.transform')));
+  for (const [label, prop, step, show, store] of rows) {
+    const inputs = ['x', 'y', 'z'].map((axis) => {
+      const input = el('input', { type: 'number', step, value: show(m[prop][axis]).toFixed(2), 'aria-label': `${t(label)} ${axis}` });
+      input.addEventListener('input', () => {
+        const v = parseFloat(input.value);
+        if (!Number.isFinite(v)) return;
+        m[prop][axis] = store(v);
+        scheduleAnalysis();
+      });
+      // Scaling changes the volume and with it the number of observations
+      if (prop === 'scale') input.addEventListener('change', () => {
+        refreshPoints(p);
+        renderList();
+        updateStatus();
+      });
+      return el('label', {}, el('span', { 'aria-hidden': 'true' }, axis), input);
+    });
+    fieldset.append(el('div', { class: 'transform-row' }, el('span', { class: 'field-head' }, t(label)), ...inputs));
+  }
+  return fieldset;
 }

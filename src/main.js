@@ -57,22 +57,43 @@ if (window.matchMedia('(max-width: 800px)').matches) setAnalysisCollapsed(true);
 for (const b of document.querySelectorAll('#analysis-scope button')) {
   b.addEventListener('click', () => {
     analysisState.scope = b.dataset.scope;
-    for (const o of document.querySelectorAll('#analysis-scope button')) o.classList.toggle('active', o === b);
+    for (const o of document.querySelectorAll('#analysis-scope button')) {
+      o.classList.toggle('active', o === b);
+      o.setAttribute('aria-checked', o === b);
+    }
     scheduleAnalysis();
   });
 }
 
-for (const b of document.querySelectorAll('#analysis-tabs button')) {
-  b.addEventListener('click', () => {
-    analysisState.tab = b.dataset.tab;
-    for (const o of document.querySelectorAll('#analysis-tabs button')) {
-      o.classList.toggle('active', o === b);
-      o.setAttribute('aria-selected', o === b);
-    }
-    for (const pane of document.querySelectorAll('.tab-pane')) pane.hidden = pane.dataset.pane !== b.dataset.tab;
-    scheduleAnalysis();
-  });
+// WAI-ARIA tabs: one tab in the tab order, arrow keys / Home / End move between them
+const tabButtons = [...document.querySelectorAll('#analysis-tabs [role="tab"]')];
+function selectTab(b) {
+  analysisState.tab = b.dataset.tab;
+  for (const o of tabButtons) {
+    o.classList.toggle('active', o === b);
+    o.setAttribute('aria-selected', o === b);
+    o.tabIndex = o === b ? 0 : -1;
+  }
+  for (const pane of document.querySelectorAll('.tab-pane')) pane.hidden = pane.dataset.pane !== b.dataset.tab;
+  scheduleAnalysis();
 }
+for (const b of tabButtons) b.addEventListener('click', () => selectTab(b));
+document.getElementById('analysis-tabs').addEventListener('keydown', (e) => {
+  const i = tabButtons.indexOf(document.activeElement);
+  if (i < 0) return;
+  const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabButtons.length - 1 }[e.key];
+  if (next === undefined) return;
+  e.preventDefault();
+  const b = tabButtons[(next + tabButtons.length) % tabButtons.length];
+  b.focus();
+  selectTab(b);
+});
+
+// The 3D canvas is focusable: arrow keys move the selection while it has focus
+const canvas = document.querySelector('#viewport canvas');
+canvas.tabIndex = 0;
+canvas.setAttribute('role', 'application');
+canvas.setAttribute('aria-describedby', 'scene-summary');
 
 document.getElementById('reg-target').addEventListener('change', (e) => {
   analysisState.regTarget = parseInt(e.target.value, 10);
@@ -103,6 +124,8 @@ function applyLanguage() {
   document.querySelector('meta[name="description"]').content = t('meta.description');
   for (const node of document.querySelectorAll('[data-i18n]')) node.textContent = t(node.dataset.i18n);
   for (const node of document.querySelectorAll('[data-i18n-title]')) node.title = t(node.dataset.i18nTitle);
+  for (const node of document.querySelectorAll('[data-i18n-aria]')) node.setAttribute('aria-label', t(node.dataset.i18nAria));
+  canvas.setAttribute('aria-label', t('a11y.canvas'));
   const keys = { translate: 'W', rotate: 'E', scale: 'R' };
   for (const b of document.querySelectorAll('#mode-buttons button')) b.title = t('mode.shortcut', { key: keys[b.dataset.mode] });
   document.getElementById('help').textContent = t(isTouch ? 'help.touch' : 'help.mouse');

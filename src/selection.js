@@ -17,6 +17,7 @@ gizmo.addEventListener('dragging-changed', (e) => {
     state.selection.forEach(refreshPoints);
     if (gizmo.object === pivot) capturePivot();
     renderList();
+    renderProps();
     updateStatus();
   }
 });
@@ -211,8 +212,30 @@ export function piecesInRect(left, top, right, bottom) {
   });
 }
 
+// Arrow keys nudge the selection while the 3D canvas has focus; one history step per key press
+const NUDGE = { arrowleft: [-1, 0, 0], arrowright: [1, 0, 0], arrowup: [0, 0, -1], arrowdown: [0, 0, 1], pageup: [0, 1, 0], pagedown: [0, -1, 0] };
+let nudged = false;
+function nudge(e) {
+  const dir = NUDGE[e.key.toLowerCase()];
+  if (!dir || document.activeElement !== renderer.domElement || !state.selection.length) return false;
+  e.preventDefault();
+  const step = e.shiftKey ? 1 : 0.1;
+  for (const p of state.selection) p.mesh.position.add(new THREE.Vector3(...dir).multiplyScalar(step));
+  attachGizmo();
+  scheduleAnalysis();
+  nudged = true;
+  return true;
+}
+window.addEventListener('keyup', (e) => {
+  if (!nudged || !NUDGE[e.key.toLowerCase()]) return;
+  nudged = false;
+  recordChange();
+  renderProps();
+});
+
 window.addEventListener('keydown', (e) => {
   if (e.target instanceof Element && e.target.closest('input, select, textarea')) return;
+  if (nudge(e)) return;
   const k = e.key.toLowerCase();
   const ctrl = e.ctrlKey || e.metaKey;
   if (k === 'z' && ctrl) {

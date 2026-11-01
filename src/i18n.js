@@ -1,0 +1,387 @@
+// Interface strings in Turkish and English. `{name}` placeholders are filled by t().
+
+const STRINGS = {
+  tr: {
+    'meta.description': 'Oyun hamuruyla veri geometrisi: 3B hamur şekilleri yap, onlardan nokta bulutu (veri seti) üret.',
+    'brand.tagline': 'Oyun hamuruyla veri geometrisi',
+    'lang.switch': 'Switch to English',
+
+    'color.red': 'Kırmızı',
+    'color.orange': 'Turuncu',
+    'color.yellow': 'Sarı',
+    'color.green': 'Yeşil',
+    'color.blue': 'Mavi',
+    'color.purple': 'Mor',
+    'color.pink': 'Pembe',
+    'color.brown': 'Kahverengi',
+    'color.white': 'Beyaz',
+    'color.custom': 'Özel',
+
+    'dough.classic': 'Klasik',
+    'dough.glossy': 'Parlak (slime)',
+    'dough.glitter': 'Simli',
+
+    'shape.ball': 'Top',
+    'shape.snake': 'Yılan',
+    'shape.slab': 'Levha',
+
+    'param.radius': 'Yarıçap',
+    'param.length': 'Uzunluk',
+    'param.width': 'Genişlik',
+    'param.depth': 'Derinlik',
+    'param.thickness': 'Kalınlık',
+    'param.curvature': 'Bükülme',
+    'param.texture': 'Doku (pürüz / gürültü)',
+
+    'panel.add': 'Hamur ekle',
+    'panel.ghost': 'Hayalet veri',
+    'panel.pieces': 'Parçalar',
+    'panel.selected': 'Seçili parça',
+    'panel.data': 'Veri',
+    'panel.scene': 'Sahne',
+
+    'ghost.hint': "Bir CSV yükle. Veri PCA ile 3B'ye indirgenip sahnede yarı saydam bir nokta bulutu olarak görünür. Modelini hamurla bunun üzerine kur.",
+    'ghost.load': 'CSV yükle',
+    'ghost.gapminder': 'Gapminder örneği',
+    'ghost.loading': 'Yükleniyor…',
+    'ghost.rows': '{file} · {n} satır',
+    'ghost.firstRows': ' (ilk {n})',
+    'ghost.vars': 'Değişkenler (PCA girdisi)',
+    'ghost.colorBy': 'Renk (kategorik sütun)',
+    'ghost.none': 'Yok',
+    'ghost.standardize': 'Standartlaştır (z-skoru)',
+    'ghost.log': 'Çarpık pozitif sütunlara log uygula',
+    'ghost.show': 'Hayaleti göster',
+    'ghost.arrows': 'Değişken oklarını göster',
+    'ghost.needVars': 'PCA ile 3B hayalet için en az 3 değişken seç.',
+    'ghost.retained': '3B PCA verideki varyansın {pct} kadarını koruyor.',
+    'ghost.logged': 'Log uygulanan: {cols}',
+    'ghost.dropped': '{n} satır eksik değer yüzünden dışarıda kaldı.',
+    'ghost.remove': 'Hayaleti kaldır',
+
+    'fit.title': 'Hamur uyumu',
+    'fit.coverage': 'Kapsama',
+    'fit.spill': 'Taşma',
+    'fit.coverageTitle': 'Hayalet noktaların ne kadarının yakınında hamur var',
+    'fit.spillTitle': 'Hamurun ne kadarı verinin olmadığı yerde',
+    'fit.hint': 'Kapsama: verinin ne kadarına hamur değiyor. Taşma: hamurun ne kadarı boş yerde. İyi model: kapsama yüksek, taşma düşük.',
+    'fit.addDough': 'Uyum skoru için sahneye hamur ekle.',
+
+    'data.view': 'Görünüm',
+    'view.dough': 'Hamur',
+    'view.both': 'Hamur + nokta',
+    'view.points': 'Nokta',
+    'data.density': 'Nokta yoğunluğu',
+    'data.hint': 'Her parça hacmiyle orantılı sayıda gözlem üretir. Doku arttıkça noktalar hamurun dışına saçılır (gürültü).',
+    'data.export': 'CSV indir',
+
+    'scene.example': 'Örnek sahne',
+    'scene.save': 'Kaydet',
+    'scene.open': 'Aç',
+    'scene.clear': 'Temizle',
+
+    'mode.translate': 'Taşı',
+    'mode.rotate': 'Döndür',
+    'mode.scale': 'Ölçekle',
+    'mode.shortcut': 'Kısayol: {key}',
+    'tool.duplicate': 'Çoğalt',
+    'tool.delete': 'Sil',
+
+    'help.mouse': 'Tık: seç · Sürükle: kamerayı döndür · Sağ sürükle: kaydır · Tekerlek: yakınlaş · W/E/R: taşı/döndür/ölçekle · Del: sil · Ctrl+D: çoğalt',
+    'help.touch': 'Dokun: seç · Tek parmak: döndür · İki parmak: yakınlaş / kaydır',
+    'status': '{pieces} parça · {points} gözlem',
+    'status.one': '1 parça · {points} gözlem',
+
+    'list.empty': 'Henüz hamur yok. Yukarıdan bir parça ekle.',
+    'list.points': '{n} nokta',
+    'props.empty': 'Düzenlemek için sahnede ya da listede bir parçaya tıkla.',
+    'props.name': 'Ad',
+    'props.group': 'Grup (kategorik değişken)',
+    'props.color': 'Renk',
+    'props.customColor': 'Özel renk',
+    'props.dough': 'Hamur türü (görünüm)',
+    'props.copy': '{name} (kopya)',
+
+    'example.main': 'Ana kütle',
+    'example.trail': 'Ayrı doğrusal dizi',
+    'example.trailGroup': 'Ayrı dizi',
+    'example.china': 'Çin',
+    'example.india': 'Hindistan',
+    'example.kuwait': 'Kuveyt',
+
+    'analysis.title': 'Analiz',
+    'analysis.hide': 'Gizle',
+    'analysis.show': 'Göster',
+    'analysis.toggle': 'Paneli daralt / genişlet',
+    'scope.all': 'Tüm parçalar',
+    'scope.selected': 'Seçili parça',
+    'tab.pca': 'PCA',
+    'tab.regression': 'Regresyon',
+    'tab.shadow': 'Gölge',
+
+    'an.empty': 'Hamur ekleyince analiz burada görünür.',
+    'an.pick': 'Analiz için bir parça seç.',
+    'an.few': 'Analiz için en az 3 nokta gerekli.',
+    'an.loadings': 'Bileşenin x, y, z yükleri',
+    'an.first2': 'İlk 2 bileşenin açıkladığı varyans: {pct}',
+    'an.showAxes': 'PCA eksenlerini sahnede göster',
+    'an.linear': '<b>Çizgisel (1B):</b> noktalar neredeyse tek bir doğru boyunca uzanıyor.',
+    'an.planar': '<b>Düzlemsel (2B):</b> noktalar masa üstü gibi ince bir yüzeyde. 2B PCA gölgesi bilginin çoğunu korur.',
+    'an.volumetric': '<b>Hacimsel (3B):</b> veri üç yöne de yayılmış. 2B gölge önemli bilgi kaybeder.',
+    'an.corr': 'Korelasyon',
+    'an.corrNote': 'r: Pearson (doğrusal) · ρ: Spearman, τ: Kendall (monoton)',
+    'an.kendallSub': ' · τ, {n} noktalık alt örnekle hesaplandı',
+    'an.eta': 'Grup etkisi (η²)',
+    'an.groups': '{n} grup',
+    'an.etaNote': 'Grup bilgisi her eksendeki varyansın ne kadarını açıklıyor?',
+    'an.etaNeed': 'η² için en az 2 farklı grup gerekli. Parçalara farklı grup adları ver.',
+
+    'reg.target': 'Hedef (bağımlı) eksen',
+    'reg.showPlane': 'Regresyon düzlemini sahnede göster',
+    'reg.model': 'Model',
+    'reg.fit': 'Uyum',
+    'reg.r2Title': 'Hedefteki varyansın düzlemle açıklanan payı',
+    'reg.rmseTitle': 'Tahmin hatasının tipik büyüklüğü (sahne birimi)',
+    'reg.strong': 'Düzlem veriyi iyi açıklıyor (R² yüksek).',
+    'reg.medium': 'Düzlem verinin bir kısmını açıklıyor.',
+    'reg.weak': 'Düzlem veriyi zayıf açıklıyor: {target}, diğer iki eksenle doğrusal ilişkili değil.',
+    'reg.residuals': 'Residual grafiği',
+    'reg.residualAxes': 'Yatay: {x} · Dikey: residual (gerçek − tahmin)',
+    'reg.fitted': 'tahmin',
+    'reg.curved': "Residual'larda eğri bir örüntü var: ilişki doğrusal değil (bükülmüş hamuru düşün). Düz bir düzlem bunu yakalayamaz.",
+    'reg.random': "Residual'lar sıfır çizgisi etrafında rastgele dağılıyor: doğrusal model uygun görünüyor.",
+
+    'shadow.intro': 'Işığı döndür: hamurun gölgesi arkadaki perdeye düşer. Gölge, verinin 2B projeksiyonudur. PCA, en çok bilgiyi koruyan gölgeyi bulur.',
+    'shadow.azimuth': 'Işık yönü',
+    'shadow.elevation': 'Işık yüksekliği',
+    'shadow.align': 'PCA gölgesine hizala',
+    'shadow.worst': 'En kötü gölge',
+    'shadow.kept': 'Bu gölge',
+    'shadow.best': 'PCA (PC1+PC2)',
+    'shadow.keptTitle': 'Gölgenin koruduğu varyans',
+    'shadow.match': "Bu gölge PCA'nın 2B grafiğiyle aynı: mümkün olan en bilgili gölge.",
+    'shadow.gap': 'PCA gölgesi {gap} puan daha fazla varyans koruyor. Işığı döndürerek yaklaşmayı dene.',
+    'shadow.plot': 'Gölgenin 2B görünümü',
+
+    'err.notScene': 'Bu bir DoughLab sahne dosyası değil.',
+    'err.csvEmpty': 'CSV boş görünüyor.',
+    'err.needNumeric': 'Hayalet için en az 3 sayısal sütun gerekli.',
+    'err.fewRows': 'Seçilen sütunlarda eksiksiz en az 3 satır gerekli.',
+    'err.csvOpen': 'CSV açılamadı: {msg}',
+    'err.gapminder': 'Gapminder verisi indirilemedi: {msg}',
+    'err.sceneOpen': 'Sahne açılamadı: {msg}',
+    'confirm.example': 'Mevcut sahne silinip örnek sahne yüklensin mi?',
+    'confirm.clear': 'Tüm parçalar silinsin mi?',
+  },
+
+  en: {
+    'meta.description': 'Data geometry with play dough: sculpt 3D dough shapes and turn them into point-cloud datasets.',
+    'brand.tagline': 'Data geometry with play dough',
+    'lang.switch': 'Türkçeye geç',
+
+    'color.red': 'Red',
+    'color.orange': 'Orange',
+    'color.yellow': 'Yellow',
+    'color.green': 'Green',
+    'color.blue': 'Blue',
+    'color.purple': 'Purple',
+    'color.pink': 'Pink',
+    'color.brown': 'Brown',
+    'color.white': 'White',
+    'color.custom': 'Custom',
+
+    'dough.classic': 'Classic',
+    'dough.glossy': 'Glossy (slime)',
+    'dough.glitter': 'Glitter',
+
+    'shape.ball': 'Ball',
+    'shape.snake': 'Snake',
+    'shape.slab': 'Slab',
+
+    'param.radius': 'Radius',
+    'param.length': 'Length',
+    'param.width': 'Width',
+    'param.depth': 'Depth',
+    'param.thickness': 'Thickness',
+    'param.curvature': 'Bend',
+    'param.texture': 'Texture (roughness / noise)',
+
+    'panel.add': 'Add dough',
+    'panel.ghost': 'Ghost data',
+    'panel.pieces': 'Pieces',
+    'panel.selected': 'Selected piece',
+    'panel.data': 'Data',
+    'panel.scene': 'Scene',
+
+    'ghost.hint': 'Load a CSV. It is reduced to 3D with PCA and shown as a translucent point cloud. Sculpt your dough model over it.',
+    'ghost.load': 'Load CSV',
+    'ghost.gapminder': 'Gapminder sample',
+    'ghost.loading': 'Loading…',
+    'ghost.rows': '{file} · {n} rows',
+    'ghost.firstRows': ' (first {n})',
+    'ghost.vars': 'Variables (PCA input)',
+    'ghost.colorBy': 'Colour (categorical column)',
+    'ghost.none': 'None',
+    'ghost.standardize': 'Standardise (z-score)',
+    'ghost.log': 'Log-transform skewed positive columns',
+    'ghost.show': 'Show ghost',
+    'ghost.arrows': 'Show variable arrows',
+    'ghost.needVars': 'Pick at least 3 variables for a 3D ghost.',
+    'ghost.retained': 'The 3D PCA keeps {pct} of the variance.',
+    'ghost.logged': 'Log-transformed: {cols}',
+    'ghost.dropped': '{n} rows were dropped because of missing values.',
+    'ghost.remove': 'Remove ghost',
+
+    'fit.title': 'Dough fit',
+    'fit.coverage': 'Coverage',
+    'fit.spill': 'Spill',
+    'fit.coverageTitle': 'Share of ghost points with dough nearby',
+    'fit.spillTitle': 'Share of dough where there is no data',
+    'fit.hint': 'Coverage: how much of the data the dough touches. Spill: how much dough sits in empty space. A good model has high coverage and low spill.',
+    'fit.addDough': 'Add dough to the scene to get a fit score.',
+
+    'data.view': 'View',
+    'view.dough': 'Dough',
+    'view.both': 'Dough + points',
+    'view.points': 'Points',
+    'data.density': 'Point density',
+    'data.hint': 'Each piece produces observations in proportion to its volume. More texture scatters the points outside the dough (noise).',
+    'data.export': 'Download CSV',
+
+    'scene.example': 'Example scene',
+    'scene.save': 'Save',
+    'scene.open': 'Open',
+    'scene.clear': 'Clear',
+
+    'mode.translate': 'Move',
+    'mode.rotate': 'Rotate',
+    'mode.scale': 'Scale',
+    'mode.shortcut': 'Shortcut: {key}',
+    'tool.duplicate': 'Duplicate',
+    'tool.delete': 'Delete',
+
+    'help.mouse': 'Click: select · Drag: orbit · Right drag: pan · Wheel: zoom · W/E/R: move/rotate/scale · Del: delete · Ctrl+D: duplicate',
+    'help.touch': 'Tap: select · One finger: orbit · Two fingers: zoom / pan',
+    'status': '{pieces} pieces · {points} observations',
+    'status.one': '1 piece · {points} observations',
+
+    'list.empty': 'No dough yet. Add a piece above.',
+    'list.points': '{n} points',
+    'props.empty': 'Click a piece in the scene or the list to edit it.',
+    'props.name': 'Name',
+    'props.group': 'Group (categorical variable)',
+    'props.color': 'Colour',
+    'props.customColor': 'Custom colour',
+    'props.dough': 'Dough type (appearance)',
+    'props.copy': '{name} (copy)',
+
+    'example.main': 'Main mass',
+    'example.trail': 'Separate linear trail',
+    'example.trailGroup': 'Separate trail',
+    'example.china': 'China',
+    'example.india': 'India',
+    'example.kuwait': 'Kuwait',
+
+    'analysis.title': 'Analysis',
+    'analysis.hide': 'Hide',
+    'analysis.show': 'Show',
+    'analysis.toggle': 'Collapse / expand panel',
+    'scope.all': 'All pieces',
+    'scope.selected': 'Selected piece',
+    'tab.pca': 'PCA',
+    'tab.regression': 'Regression',
+    'tab.shadow': 'Shadow',
+
+    'an.empty': 'Add dough to see the analysis here.',
+    'an.pick': 'Select a piece to analyse.',
+    'an.few': 'At least 3 points are needed for the analysis.',
+    'an.loadings': 'Component loadings on x, y, z',
+    'an.first2': 'Variance explained by the first 2 components: {pct}',
+    'an.showAxes': 'Show PCA axes in the scene',
+    'an.linear': '<b>Linear (1D):</b> the points lie almost along a single line.',
+    'an.planar': '<b>Planar (2D):</b> the points lie on a thin, table-like surface. A 2D PCA shadow keeps most of the information.',
+    'an.volumetric': '<b>Volumetric (3D):</b> the data spreads in all three directions. A 2D shadow loses important information.',
+    'an.corr': 'Correlation',
+    'an.corrNote': 'r: Pearson (linear) · ρ: Spearman, τ: Kendall (monotonic)',
+    'an.kendallSub': ' · τ computed on a {n}-point subsample',
+    'an.eta': 'Group effect (η²)',
+    'an.groups': '{n} groups',
+    'an.etaNote': "How much of each axis's variance do the groups explain?",
+    'an.etaNeed': 'η² needs at least 2 different groups. Give the pieces different group names.',
+
+    'reg.target': 'Target (dependent) axis',
+    'reg.showPlane': 'Show the regression plane in the scene',
+    'reg.model': 'Model',
+    'reg.fit': 'Fit',
+    'reg.r2Title': 'Share of the target variance explained by the plane',
+    'reg.rmseTitle': 'Typical size of the prediction error (scene units)',
+    'reg.strong': 'The plane explains the data well (high R²).',
+    'reg.medium': 'The plane explains part of the data.',
+    'reg.weak': 'The plane explains little: {target} has no strong linear relationship with the other two axes.',
+    'reg.residuals': 'Residual plot',
+    'reg.residualAxes': 'Horizontal: {x} · Vertical: residual (actual − fitted)',
+    'reg.fitted': 'fitted',
+    'reg.curved': 'The residuals form a curve: the relationship is nonlinear (think of bent dough). A flat plane cannot capture it.',
+    'reg.random': 'The residuals scatter randomly around zero: a linear model looks appropriate.',
+
+    'shadow.intro': 'Rotate the light: the dough casts a shadow on the screen behind it. The shadow is a 2D projection of the data. PCA finds the shadow that keeps the most information.',
+    'shadow.azimuth': 'Light direction',
+    'shadow.elevation': 'Light elevation',
+    'shadow.align': 'Align with PCA',
+    'shadow.worst': 'Worst shadow',
+    'shadow.kept': 'This shadow',
+    'shadow.best': 'PCA (PC1+PC2)',
+    'shadow.keptTitle': 'Variance kept by the shadow',
+    'shadow.match': 'This shadow matches the 2D PCA plot: the most informative shadow possible.',
+    'shadow.gap': 'The PCA shadow keeps {gap} points more variance. Rotate the light to get closer.',
+    'shadow.plot': 'The shadow in 2D',
+
+    'err.notScene': 'This is not a DoughLab scene file.',
+    'err.csvEmpty': 'The CSV looks empty.',
+    'err.needNumeric': 'The ghost needs at least 3 numeric columns.',
+    'err.fewRows': 'The chosen columns need at least 3 complete rows.',
+    'err.csvOpen': 'Could not open the CSV: {msg}',
+    'err.gapminder': 'Could not download the Gapminder data: {msg}',
+    'err.sceneOpen': 'Could not open the scene: {msg}',
+    'confirm.example': 'Replace the current scene with the example scene?',
+    'confirm.clear': 'Delete all pieces?',
+  },
+};
+
+export const LANGUAGES = Object.keys(STRINGS);
+let lang = 'tr';
+
+export function setLang(code) {
+  lang = STRINGS[code] ? code : 'tr';
+}
+
+export function getLang() {
+  return lang;
+}
+
+export function t(key, vars = {}) {
+  const s = STRINGS[lang][key] ?? STRINGS.tr[key] ?? key;
+  return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+}
+
+// The same string in every language, e.g. to recognise a default colour name after a switch
+export function tAll(key) {
+  return LANGUAGES.map((l) => STRINGS[l][key]);
+}
+
+// Percentages: "%90.9" in Turkish, "90.9%" in English
+export function pct(v) {
+  const s = (v * 100).toFixed(1);
+  return lang === 'tr' ? `%${s}` : `${s}%`;
+}
+
+// Errors thrown with a known message key are shown in the current language
+export function errorText(err) {
+  return err?.key ? t(err.key) : err?.message ?? String(err);
+}
+
+export function keyedError(key) {
+  const err = new Error(STRINGS.en[key] ?? key);
+  err.key = key;
+  return err;
+}

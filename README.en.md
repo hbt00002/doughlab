@@ -19,7 +19,7 @@ Sculpt 3D shapes from virtual dough in your browser and turn them into datasets,
 
 </div>
 
-> **Note:** The user interface is currently in Turkish. The [interface glossary](#interface-glossary) below maps every label to English. An English interface is on the [roadmap](#roadmap).
+> **Note:** The interface is available in English and Turkish. Switch with the **EN / TR** button in the top-left corner, or open the app with [`?lang=en`](https://hbt00002.github.io/doughlab/?lang=en).
 
 ## Contents
 
@@ -27,7 +27,6 @@ Sculpt 3D shapes from virtual dough in your browser and turn them into datasets,
 - [Features](#features)
 - [Quick start](#quick-start)
 - [Usage](#usage)
-- [Interface glossary](#interface-glossary)
 - [Dough-to-data mapping](#dough-to-data-mapping)
 - [Using the data in Python / Colab](#using-the-data-in-python--colab)
 - [How it works](#how-it-works)
@@ -66,6 +65,17 @@ DoughLab grew out of a data science course assignment: model the 3D PCA plot of 
 - **Group effect (η²):** how much of each axis's variance the group labels explain.
 - Analyse **all pieces** or the **selected piece** only. Comparing the two is an easy way to see that a whole and its subgroup can show different patterns (Simpson's paradox).
 
+### Regression
+- Pick a **target axis** (e.g. `y`); it is regressed on the other two axes by least squares.
+- The panel shows the model equation, **R²** and **RMSE**; the **regression plane** is drawn in the scene.
+- A **residual plot** shows the errors in each piece's colour. When the residuals form a curve the app says so: bent dough is a nonlinear relationship that a flat plane cannot capture.
+
+### Shadow mode
+- Rotate the light with two sliders. The dough's **real shadow** and the **projection** of its points fall on a screen behind the data.
+- The variance the shadow keeps is compared with the best possible shadow (**PC1 + PC2**).
+- **Align with PCA** points the light along PC3, so the shadow on the screen becomes the 2D PCA plot itself. **Worst shadow** points it along PC1 and loses the most information.
+- The shadow is also drawn as a 2D scatter plot in the panel.
+
 ### Ghost data mode
 
 ![Gapminder data in ghost mode: points coloured by continent with variable arrows](docs/ghost-mode.png)
@@ -76,6 +86,10 @@ DoughLab grew out of a data science course assignment: model the 3D PCA plot of 
 - Points are **coloured by a categorical column**, with a **loading arrow** (biplot) for every variable.
 - **Hover** over a point to see its row.
 - **Dough fit:** *coverage* and *spill* scores measure how well your dough model matches the data.
+
+### Interface
+- **English and Turkish** interface. Switch with the **EN / TR** button; the choice is remembered in the browser. You can also add `?lang=en` to the link.
+- **Touch screen support:** tap to select, **Duplicate / Delete** buttons in the toolbar, bigger handles that are easy to grab with a finger, and tap a ghost point to see its row.
 
 ## Quick start
 
@@ -99,17 +113,23 @@ Then open `http://localhost:8000`.
 
 ### Basic workflow
 
-1. Pick a piece under **Hamur ekle** (Add dough) and move, rotate or scale it in the scene.
-2. Adjust size, bending, texture, colour and group name in **Seçili parça** (Selected piece).
-3. Watch PCA and correlations change in the **Analiz** (Analysis) panel.
-4. Switch **Görünüm → Nokta** (View → Points) to see the generated data and export it with **CSV indir** (Download CSV).
+1. Pick a piece under **Add dough** and move, rotate or scale it in the scene.
+2. Adjust size, bending, texture, colour and group name in **Selected piece**.
+3. Watch PCA and correlations change in the **Analysis** panel.
+4. Switch **View → Points** to see the generated data and export it with **Download CSV**.
 
 ### Sculpting over a ghost
 
-1. Click **Hayalet veri → Gapminder örneği** (Ghost data → Gapminder sample), or load your own CSV.
+1. Click **Ghost data → Gapminder sample**, or load your own CSV.
 2. Choose the variables that go into PCA and the column used for colouring.
 3. Place dough pieces over the ghost.
-4. Push **Kapsama** (coverage) up and **Taşma** (spill) down.
+4. Push **Coverage** up and **Spill** down.
+
+### Regression and shadow
+
+1. Add some dough (or open the **Example scene**).
+2. In **Analysis → Regression**, pick the target axis. Look at the plane, R² and the residual plot. Bend a snake and watch a curve appear in the residuals.
+3. In **Analysis → Shadow**, rotate the light, then press **Align with PCA**. Watch how the shadow on the screen and the kept variance change.
 
 ### Mouse and keyboard
 
@@ -124,28 +144,16 @@ Then open `http://localhost:8000`.
 | Duplicate selected piece | `Ctrl` + `D` |
 | Clear selection | `Esc` |
 
-## Interface glossary
+### Touch screen
 
-| Turkish label | English |
+| Action | Control |
 |---|---|
-| Hamur ekle · Top · Yılan · Levha | Add dough · Ball · Snake · Slab |
-| Taşı · Döndür · Ölçekle | Move · Rotate · Scale |
-| Parçalar · Seçili parça | Pieces · Selected piece |
-| Ad · Grup (kategorik değişken) · Renk | Name · Group (categorical variable) · Colour |
-| Hamur türü: Klasik · Parlak · Simli | Dough type: Classic · Glossy · Glitter |
-| Yarıçap · Uzunluk · Genişlik · Derinlik · Kalınlık · Bükülme · Doku | Radius · Length · Width · Depth · Thickness · Bend · Texture |
-| Çoğalt · Sil | Duplicate · Delete |
-| Görünüm: Hamur · Hamur + nokta · Nokta | View: Dough · Dough + points · Points |
-| Nokta yoğunluğu · CSV indir | Point density · Download CSV |
-| Örnek sahne · Kaydet · Aç · Temizle | Example scene · Save · Open · Clear |
-| Analiz · Tüm parçalar · Seçili parça | Analysis · All pieces · Selected piece |
-| Çizgisel · Düzlemsel · Hacimsel | Linear · Planar · Volumetric |
-| Korelasyon · Grup etkisi | Correlation · Group effect |
-| Hayalet veri · CSV yükle · Gapminder örneği | Ghost data · Load CSV · Gapminder sample |
-| Değişkenler · Renk (kategorik sütun) | Variables · Colour (categorical column) |
-| Standartlaştır · Çarpık pozitif sütunlara log uygula | Standardise · Log-transform skewed positive columns |
-| Hayaleti göster · Değişken oklarını göster · Hayaleti kaldır | Show ghost · Show variable arrows · Remove ghost |
-| Hamur uyumu: Kapsama · Taşma | Dough fit: Coverage · Spill |
+| Select a piece | Tap |
+| Orbit the camera | One-finger drag |
+| Zoom / pan | Two fingers |
+| Move / rotate / scale | Toolbar at the top and the handles |
+| Duplicate / delete | **Duplicate** / **Delete** in the toolbar |
+| See a ghost row | Tap a ghost point |
 
 ## Dough-to-data mapping
 
@@ -211,6 +219,25 @@ sns.pairplot(df, vars=["x", "y", "z"], hue="group")
 </details>
 
 <details>
+<summary><b>Regression</b></summary>
+
+- The target axis is regressed on the other two axes by **ordinary least squares** (centred normal equations).
+- **R²** = 1 − SSE / SST, **RMSE** = √(SSE / n).
+- The plane in the scene covers the data range of the two predictors, padded by 5%.
+- **Curve detection:** the residuals are correlated with the square of the fitted value and of each predictor. If the strongest r² exceeds 0.1 the app warns and draws the residual plot against that axis. Predictors are checked too because a symmetric bend can leave the fitted value flat.
+
+</details>
+
+<details>
+<summary><b>Shadow mode</b></summary>
+
+- The light direction `d` (a unit vector) comes from the azimuth and elevation sliders. Every point is projected onto the plane perpendicular to `d`.
+- **Kept variance** = 1 − (variance along `d` / total variance). The best value is PC1 + PC2, reached when `d` = PC3.
+- The screen sits just behind the radius that holds 98% of the data. The scene's real light moves to the same direction, so the dough casts its shadow on the screen.
+
+</details>
+
+<details>
 <summary><b>Ghost data</b></summary>
 
 - **CSV parsing:** Comma, semicolon and tab delimiters are detected automatically. Decimal commas are supported in semicolon-delimited files. Up to 20,000 rows are used.
@@ -234,10 +261,11 @@ There is no build step. Everything runs in the browser as plain ES modules.
 index.html          UI skeleton
 style.css           Styles
 src/
-  main.js           Scene, pieces, UI, export
+  main.js           Scene, pieces, UI, analysis tabs, export
+  i18n.js           English and Turkish interface strings
   geometry.js       Dough geometry, bending, surface texture
   sampling.js       Point sampling inside pieces
-  analysis.js       PCA, Pearson, Spearman, Kendall, η²
+  analysis.js       PCA, Pearson, Spearman, Kendall, η², regression, projection
   ghost-data.js     CSV parsing, ghost PCA, fit score (no Three.js)
   ghost.js          Ghost point cloud and variable arrows
   arrows.js         Labelled 3D arrows
@@ -248,10 +276,10 @@ docs/               README images
 
 - [x] Live PCA, correlation and η² panel
 - [x] Ghost point cloud from CSV with a dough fit score
-- [ ] **Shadow mode:** rotate a light and compare the 2D projection with the true PCA projection
-- [ ] Regression plane and residual plot
-- [ ] English interface
-- [ ] Touch screen improvements
+- [x] **Shadow mode:** rotate a light and compare the 2D projection with the true PCA projection
+- [x] Regression plane and residual plot
+- [x] English interface
+- [x] Touch screen improvements
 
 ## Contributing
 

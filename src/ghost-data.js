@@ -1,5 +1,6 @@
 // Turns a CSV into a 3D "ghost" point cloud via PCA. No Three.js here, so it runs anywhere.
 import { mean, pca } from './analysis.js';
+import { keyedError } from './i18n.js';
 
 export const GHOST_SPAN = 10; // PC1 is scaled to span this many scene units
 const PALETTE = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'];
@@ -100,7 +101,7 @@ export function buildGhostData(table, { columns, colorBy, standardize, logSkewed
     }
   });
   const n = keep.length;
-  if (n < 3) throw new Error('Seçilen sütunlarda eksiksiz en az 3 satır gerekli.');
+  if (n < 3) throw keyedError('err.fewRows');
 
   const logged = [];
   if (logSkewed) {

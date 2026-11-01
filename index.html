@@ -18,67 +18,70 @@
 <body>
   <aside class="sidebar">
     <header class="brand">
-      <h1>DoughLab</h1>
-      <p>Oyun hamuruyla veri geometrisi</p>
+      <div>
+        <h1>DoughLab</h1>
+        <p data-i18n="brand.tagline">Oyun hamuruyla veri geometrisi</p>
+      </div>
+      <button id="lang-toggle" class="lang-toggle" data-i18n-title="lang.switch">EN</button>
     </header>
 
     <section class="panel">
-      <h2>Hamur ekle</h2>
+      <h2 data-i18n="panel.add">Hamur ekle</h2>
       <div class="shape-buttons" id="shape-buttons">
-        <button data-shape="ball"><span class="ico ico-ball"></span>Top</button>
-        <button data-shape="snake"><span class="ico ico-snake"></span>Yılan</button>
-        <button data-shape="slab"><span class="ico ico-slab"></span>Levha</button>
+        <button data-shape="ball"><span class="ico ico-ball"></span><span data-i18n="shape.ball">Top</span></button>
+        <button data-shape="snake"><span class="ico ico-snake"></span><span data-i18n="shape.snake">Yılan</span></button>
+        <button data-shape="slab"><span class="ico ico-slab"></span><span data-i18n="shape.slab">Levha</span></button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>Hayalet veri</h2>
-      <p class="hint">Bir CSV yükle. Veri PCA ile 3B'ye indirgenip sahnede yarı saydam bir nokta bulutu olarak görünür. Modelini hamurla bunun üzerine kur.</p>
+      <h2 data-i18n="panel.ghost">Hayalet veri</h2>
+      <p class="hint" data-i18n="ghost.hint"></p>
       <div class="btn-row">
-        <button id="ghost-load">CSV yükle</button>
-        <button id="ghost-gapminder">Gapminder örneği</button>
+        <button id="ghost-load" data-i18n="ghost.load">CSV yükle</button>
+        <button id="ghost-gapminder" data-i18n="ghost.gapminder">Gapminder örneği</button>
       </div>
       <input type="file" id="ghost-file" accept=".csv,.tsv,.txt,text/csv" hidden>
       <div id="ghost-settings"></div>
     </section>
 
     <section class="panel">
-      <h2>Parçalar</h2>
+      <h2 data-i18n="panel.pieces">Parçalar</h2>
       <div id="piece-list" class="piece-list"></div>
     </section>
 
     <section class="panel">
-      <h2>Seçili parça</h2>
+      <h2 data-i18n="panel.selected">Seçili parça</h2>
       <div id="props"></div>
     </section>
 
     <section class="panel">
-      <h2>Veri</h2>
+      <h2 data-i18n="panel.data">Veri</h2>
       <div class="field">
-        <span class="field-head">Görünüm</span>
+        <span class="field-head" data-i18n="data.view">Görünüm</span>
         <div class="segmented" id="view-mode">
-          <button data-view="dough" class="active">Hamur</button>
-          <button data-view="both">Hamur + nokta</button>
-          <button data-view="points">Nokta</button>
+          <button data-view="dough" class="active" data-i18n="view.dough">Hamur</button>
+          <button data-view="both" data-i18n="view.both">Hamur + nokta</button>
+          <button data-view="points" data-i18n="view.points">Nokta</button>
         </div>
       </div>
       <label class="field">
-        <span class="field-head">Nokta yoğunluğu <output id="density-value">60</output></span>
+        <span class="field-head"><span data-i18n="data.density">Nokta yoğunluğu</span> <output id="density-value">60</output></span>
         <input id="density" type="range" min="5" max="300" step="5" value="60">
       </label>
-      <p class="hint">Her parça hacmiyle orantılı sayıda gözlem üretir. Doku arttıkça noktalar hamurun dışına saçılır (gürültü).</p>
+      <p class="hint" data-i18n="data.hint"></p>
       <div class="btn-row">
-        <button id="btn-export" class="primary">CSV indir</button>
+        <button id="btn-export" class="primary" data-i18n="data.export">CSV indir</button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>Sahne</h2>
+      <h2 data-i18n="panel.scene">Sahne</h2>
       <div class="btn-row">
-        <button id="btn-example">Örnek sahne</button>
-        <button id="btn-save">Kaydet</button>
-        <button id="btn-load">Aç</button>
-        <button id="btn-clear" class="danger">Temizle</button>
+        <button id="btn-example" data-i18n="scene.example">Örnek sahne</button>
+        <button id="btn-save" data-i18n="scene.save">Kaydet</button>
+        <button id="btn-load" data-i18n="scene.open">Aç</button>
+        <button id="btn-clear" class="danger" data-i18n="scene.clear">Temizle</button>
       </div>
       <input type="file" id="file-input" accept=".json,application/json" hidden>
     </section>
@@ -86,27 +89,71 @@
 
   <main class="stage">
     <div id="viewport"></div>
-    <div class="toolbar" id="mode-buttons">
-      <button data-mode="translate" class="active" title="Kısayol: W">Taşı</button>
-      <button data-mode="rotate" title="Kısayol: E">Döndür</button>
-      <button data-mode="scale" title="Kısayol: R">Ölçekle</button>
+    <div class="toolbar" id="toolbar">
+      <div class="toolbar-group" id="mode-buttons">
+        <button data-mode="translate" class="active" data-i18n="mode.translate">Taşı</button>
+        <button data-mode="rotate" data-i18n="mode.rotate">Döndür</button>
+        <button data-mode="scale" data-i18n="mode.scale">Ölçekle</button>
+      </div>
+      <div class="toolbar-group">
+        <button id="tool-duplicate" data-i18n="tool.duplicate" disabled>Çoğalt</button>
+        <button id="tool-delete" class="danger" data-i18n="tool.delete" disabled>Sil</button>
+      </div>
     </div>
     <aside class="analysis" id="analysis">
       <header class="analysis-head">
-        <h2>Analiz</h2>
-        <button id="analysis-toggle" title="Paneli daralt / genişlet">Gizle</button>
+        <h2 data-i18n="analysis.title">Analiz</h2>
+        <button id="analysis-toggle" data-i18n-title="analysis.toggle">Gizle</button>
       </header>
       <div class="analysis-body" id="analysis-body">
-        <div class="segmented" id="analysis-scope">
-          <button data-scope="all" class="active">Tüm parçalar</button>
-          <button data-scope="selected">Seçili parça</button>
+        <div class="tabs" id="analysis-tabs" role="tablist">
+          <button data-tab="pca" class="active" role="tab" data-i18n="tab.pca">PCA</button>
+          <button data-tab="regression" role="tab" data-i18n="tab.regression">Regresyon</button>
+          <button data-tab="shadow" role="tab" data-i18n="tab.shadow">Gölge</button>
         </div>
-        <div id="analysis-content"></div>
+        <div class="segmented" id="analysis-scope">
+          <button data-scope="all" class="active" data-i18n="scope.all">Tüm parçalar</button>
+          <button data-scope="selected" data-i18n="scope.selected">Seçili parça</button>
+        </div>
+
+        <div class="tab-pane" data-pane="pca">
+          <div id="analysis-content"></div>
+        </div>
+
+        <div class="tab-pane" data-pane="regression" hidden>
+          <label class="field">
+            <span class="field-head" data-i18n="reg.target">Hedef (bağımlı) eksen</span>
+            <select id="reg-target">
+              <option value="1">y ← x, z</option>
+              <option value="0">x ← y, z</option>
+              <option value="2">z ← x, y</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="reg-plane" checked> <span data-i18n="reg.showPlane">Regresyon düzlemini sahnede göster</span></label>
+          <div id="regression-content"></div>
+        </div>
+
+        <div class="tab-pane" data-pane="shadow" hidden>
+          <p class="note" data-i18n="shadow.intro"></p>
+          <label class="field">
+            <span class="field-head"><span data-i18n="shadow.azimuth">Işık yönü</span> <output id="shadow-azimuth-value"></output></span>
+            <input id="shadow-azimuth" type="range" min="0" max="360" step="1" value="35">
+          </label>
+          <label class="field">
+            <span class="field-head"><span data-i18n="shadow.elevation">Işık yüksekliği</span> <output id="shadow-elevation-value"></output></span>
+            <input id="shadow-elevation" type="range" min="-89" max="89" step="1" value="55">
+          </label>
+          <div class="btn-row">
+            <button id="shadow-align" class="primary" data-i18n="shadow.align">PCA gölgesine hizala</button>
+            <button id="shadow-worst" data-i18n="shadow.worst">En kötü gölge</button>
+          </div>
+          <div id="shadow-content"></div>
+        </div>
       </div>
     </aside>
     <div class="tooltip" id="tooltip" hidden></div>
     <div class="status" id="status"></div>
-    <div class="help">Tık: seç · Sürükle: kamerayı döndür · Sağ sürükle: kaydır · Tekerlek: yakınlaş · W/E/R: taşı/döndür/ölçekle · Del: sil · Ctrl+D: çoğalt</div>
+    <div class="help" id="help"></div>
   </main>
 
   <script type="module" src="src/main.js"></script>

@@ -63,6 +63,17 @@ DoughLab, bir veri bilimi dersindeki ödevden doğdu: Gapminder verisinin 3B PCA
 - **Grup etkisi (η²):** grup etiketlerinin her eksendeki varyansın ne kadarını açıkladığı.
 - Analiz **tüm parçalar** ya da yalnızca **seçili parça** için yapılabilir. Bütün ile alt grubun farklı örüntüler gösterebildiğini (Simpson paradoksu) görmenin kolay bir yolu.
 
+### Regresyon
+- Bir **hedef eksen** seç (ör. `y`); diğer iki eksen üzerinden en küçük kareler regresyonu kurulur.
+- Model denklemi, **R²** ve **RMSE** panelde gösterilir; **regresyon düzlemi** sahnede yarı saydam olarak çizilir.
+- **Residual grafiği**, hataları parçaların renkleriyle gösterir. Residual'larda eğri bir örüntü varsa uygulama bunu fark edip uyarır: bükülmüş bir hamur, düz bir düzlemle açıklanamayan doğrusal olmayan bir ilişkidir.
+
+### Gölge modu
+- Işığın yönünü ve yüksekliğini kaydırıcılarla değiştir. Hamurun **gerçek gölgesi** ve noktaların **projeksiyonu** verinin arkasındaki perdeye düşer.
+- Gölgenin koruduğu varyans, mümkün olan en iyi gölgeyle (**PC1 + PC2**) karşılaştırılır.
+- **PCA gölgesine hizala** ışığı PC3 yönüne çevirir: perdedeki gölge, 2B PCA grafiğinin ta kendisi olur. **En kötü gölge** ise ışığı PC1 yönüne çevirip en çok bilgiyi kaybettirir.
+- Gölgenin 2B görünümü ayrıca panelde çizilir.
+
 ### Hayalet veri modu
 
 ![Gapminder verisi hayalet modunda: kıtaya göre renklenmiş noktalar ve değişken okları](docs/ghost-mode.png)
@@ -73,6 +84,10 @@ DoughLab, bir veri bilimi dersindeki ödevden doğdu: Gapminder verisinin 3B PCA
 - Noktalar **kategorik bir sütuna göre** renklenir. Her değişken için bir **yük oku** (biplot) çizilir.
 - Bir noktanın **üzerine gelince** o satırın değerleri görünür.
 - **Hamur uyumu:** *kapsama* ve *taşma* skorları, hamur modelinin veriye ne kadar iyi oturduğunu ölçer.
+
+### Arayüz
+- **Türkçe ve İngilizce** arayüz. Sol üstteki **EN / TR** düğmesiyle değiştir; seçim tarayıcıda hatırlanır. Bağlantıya `?lang=en` ekleyerek de açabilirsin.
+- **Dokunmatik ekran desteği:** dokunarak seçme, araç çubuğunda **Çoğalt / Sil** düğmeleri, parmakla tutması kolay büyük tutamaçlar ve hayalet noktasına dokununca satır bilgisi.
 
 ## Hızlı başlangıç
 
@@ -108,6 +123,12 @@ Ardından tarayıcıda `http://localhost:8000` adresine git.
 3. Hamur parçalarını hayaletin üzerine yerleştir.
 4. **Kapsama** skorunu yükseltip **taşma** skorunu düşürmeye çalış.
 
+### Regresyon ve gölge
+
+1. Sahneye hamur ekle (ya da **Örnek sahne**'yi aç).
+2. **Analiz → Regresyon** sekmesinde hedef ekseni seç. Düzlemi, R²'yi ve residual grafiğini incele. Bir yılanı bükerek residual'larda eğrinin belirdiğini gör.
+3. **Analiz → Gölge** sekmesinde ışığı döndür, sonra **PCA gölgesine hizala**'ya bas. Perdedeki gölgenin ve korunan varyansın nasıl değiştiğini izle.
+
 ### Fare ve klavye
 
 | Eylem | Kontrol |
@@ -120,6 +141,17 @@ Ardından tarayıcıda `http://localhost:8000` adresine git.
 | Seçili parçayı sil | `Delete` veya `Backspace` |
 | Seçili parçayı çoğalt | `Ctrl` + `D` |
 | Seçimi kaldır | `Esc` |
+
+### Dokunmatik ekran
+
+| Eylem | Kontrol |
+|---|---|
+| Parça seç | Dokun |
+| Kamerayı döndür | Tek parmakla sürükle |
+| Yakınlaş / kaydır | İki parmak |
+| Taşı / döndür / ölçekle | Üstteki araç çubuğu ve tutamaçlar |
+| Çoğalt / sil | Araç çubuğundaki **Çoğalt** / **Sil** |
+| Hayalet satırını gör | Hayalet noktasına dokun |
 
 ## Hamur ve veri karşılıkları
 
@@ -185,6 +217,25 @@ sns.pairplot(df, vars=["x", "y", "z"], hue="group")
 </details>
 
 <details>
+<summary><b>Regresyon</b></summary>
+
+- Hedef eksen, diğer iki eksen üzerine **en küçük kareler** yöntemiyle regrese edilir (merkezlenmiş normal denklemler).
+- **R²** = 1 − SSE / SST, **RMSE** = √(SSE / n).
+- Sahnedeki düzlem, iki açıklayıcı eksenin veri aralığını (%5 payla) kaplar.
+- **Eğri tespiti:** Residual'ların, tahmin değerinin ve her açıklayıcı eksenin karesiyle korelasyonuna bakılır. En güçlü r² 0,1'i geçerse uyarı verilir ve residual grafiği o eksene göre çizilir. Simetrik bir bükülmede tahmin değeri düz kalabildiği için açıklayıcı eksenlere de bakılır.
+
+</details>
+
+<details>
+<summary><b>Gölge modu</b></summary>
+
+- Işık yönü `d` (birim vektör), yatay açı ve yükseklikten hesaplanır. Her nokta, `d`'ye dik düzleme izdüşürülür.
+- **Korunan varyans** = 1 − (`d` yönündeki varyans / toplam varyans). En iyi değer PC1 + PC2'dir ve `d` = PC3 iken elde edilir.
+- Perde, verinin %98'ini içeren yarıçapın biraz arkasına konur. Sahnedeki gerçek ışık da aynı yöne taşınır; böylece hamurun gölgesi perdeye düşer.
+
+</details>
+
+<details>
 <summary><b>Hayalet veri</b></summary>
 
 - **CSV okuma:** Virgül, noktalı virgül ve sekme ayraçları otomatik algılanır. Noktalı virgüllü dosyalarda ondalık virgül desteklenir. En fazla 20.000 satır kullanılır.
@@ -208,10 +259,11 @@ Derleme adımı yoktur. Tüm kod tarayıcıda doğrudan çalışan ES modülleri
 index.html          Arayüz iskeleti
 style.css           Stiller
 src/
-  main.js           Sahne, parçalar, arayüz, dışa aktarma
+  main.js           Sahne, parçalar, arayüz, analiz sekmeleri, dışa aktarma
+  i18n.js           Türkçe ve İngilizce arayüz metinleri
   geometry.js       Hamur geometrileri, bükme, yüzey dokusu
   sampling.js       Parça içinden nokta örnekleme
-  analysis.js       PCA, Pearson, Spearman, Kendall, η²
+  analysis.js       PCA, Pearson, Spearman, Kendall, η², regresyon, projeksiyon
   ghost-data.js     CSV okuma, hayalet PCA'sı, uyum skoru (Three.js'siz)
   ghost.js          Hayalet nokta bulutu ve değişken okları
   arrows.js         Etiketli 3B oklar
@@ -222,10 +274,10 @@ docs/               README görselleri
 
 - [x] Canlı PCA, korelasyon ve η² paneli
 - [x] CSV'den hayalet nokta bulutu ve hamur uyum skoru
-- [ ] **Gölge modu:** ışığı döndürüp 2B projeksiyonu gerçek PCA projeksiyonuyla karşılaştırma
-- [ ] Regresyon düzlemi ve residual grafiği
-- [ ] İngilizce arayüz seçeneği
-- [ ] Dokunmatik ekran iyileştirmeleri
+- [x] **Gölge modu:** ışığı döndürüp 2B projeksiyonu gerçek PCA projeksiyonuyla karşılaştırma
+- [x] Regresyon düzlemi ve residual grafiği
+- [x] İngilizce arayüz seçeneği
+- [x] Dokunmatik ekran iyileştirmeleri
 
 ## Katkı
 

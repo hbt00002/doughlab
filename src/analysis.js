@@ -140,3 +140,65 @@ export function etaSquared(values, groups) {
   for (const { sum, n } of sums.values()) ssBetween += n * (sum / n - mu) ** 2;
   return ssTotal ? ssBetween / ssTotal : NaN;
 }
+
+// Ordinary least squares of cols[target] on the other two columns.
+// Returns the plane target = intercept + coef[0]·a + coef[1]·b, where [a, b] = predictors.
+export function linearRegression(cols, target) {
+  const predictors = [0, 1, 2].filter((i) => i !== target);
+  const y = cols[target], a = cols[predictors[0]], b = cols[predictors[1]];
+  const n = y.length;
+  const my = mean(y), ma = mean(a), mb = mean(b);
+  let saa = 0, sbb = 0, sab = 0, say = 0, sby = 0, syy = 0;
+  for (let i = 0; i < n; i++) {
+    const da = a[i] - ma, db = b[i] - mb, dy = y[i] - my;
+    saa += da * da;
+    sbb += db * db;
+    sab += da * db;
+    say += da * dy;
+    sby += db * dy;
+    syy += dy * dy;
+  }
+  // Normal equations on centred data; a near-singular system means the predictors are collinear
+  const det = saa * sbb - sab * sab;
+  const coef = Math.abs(det) > 1e-12 * (saa * sbb || 1)
+    ? [(say * sbb - sby * sab) / det, (sby * saa - say * sab) / det]
+    : [saa ? say / saa : 0, 0];
+  const intercept = my - coef[0] * ma - coef[1] * mb;
+
+  const fitted = new Float64Array(n);
+  const residuals = new Float64Array(n);
+  let sse = 0;
+  for (let i = 0; i < n; i++) {
+    fitted[i] = intercept + coef[0] * a[i] + coef[1] * b[i];
+    residuals[i] = y[i] - fitted[i];
+    sse += residuals[i] ** 2;
+  }
+  return {
+    target,
+    predictors,
+    intercept,
+    coef,
+    r2: syy ? 1 - sse / syy : NaN,
+    rmse: Math.sqrt(sse / n),
+    fitted,
+    residuals,
+  };
+}
+
+// Share of the total variance that survives projecting along the unit vector `dir`
+// (a shadow cast by light coming from `dir`). The best possible value is PC1 + PC2.
+export function projectedVarianceRatio(cols, dir) {
+  const n = cols[0].length;
+  const mu = cols.map(mean);
+  let total = 0, along = 0;
+  for (let i = 0; i < n; i++) {
+    let d = 0;
+    for (let k = 0; k < 3; k++) {
+      const c = cols[k][i] - mu[k];
+      total += c * c;
+      d += c * dir[k];
+    }
+    along += d * d;
+  }
+  return total ? 1 - along / total : NaN;
+}

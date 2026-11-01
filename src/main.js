@@ -636,7 +636,8 @@ function runAnalysis() {
   const box = document.getElementById('analysis-content');
   const { cols, groups, n } = collectData();
   if (n < 3) {
-    const msg = analysisState.scope === 'selected' && !selected ? 'Analiz için bir parça seç.' : 'Analiz için en az 3 nokta gerekli.';
+    const msg = !pieces.length ? 'Hamur ekleyince analiz burada görünür.'
+      : analysisState.scope === 'selected' && !selected ? 'Analiz için bir parça seç.' : 'Analiz için en az 3 nokta gerekli.';
     box.innerHTML = `<p class="note">${msg}</p>`;
     for (const a of pcaAxes) a.group.visible = false;
     return;
@@ -1030,6 +1031,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   }
 });
 
-loadScene(EXAMPLE_SCENE);
+updateStatus();
+scheduleAnalysis();
 renderList();
 renderProps();

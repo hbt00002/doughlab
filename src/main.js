@@ -9,9 +9,9 @@ import { isTouch, pieces, settings, analysisState } from './state.js';
 import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
 import { deleteSelection, setMode, duplicateSelected } from './selection.js';
-import { renderList, renderProps, updateStatus } from './panels.js';
+import { renderList, renderProps, updateStatus, updateEmptyCard } from './panels.js';
 import { scheduleAnalysis, syncShadowSliders, lightAlongPC } from './analysis-ui.js';
-import { renderGhostSettings, updateGhostFit, gapminderButton } from './ghost-ui.js';
+import { renderGhostSettings, updateGhostFit, gapminderButton, loadGapminder, onGhostChange } from './ghost-ui.js';
 
 // ---------------------------------------------------------------------------
 // Language: ?lang=en in the URL, then the saved choice, then the browser language
@@ -168,6 +168,13 @@ densityInput.addEventListener('input', () => {
 densityInput.addEventListener('change', recordChange);
 
 document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('empty-ball').addEventListener('click', () => addPiece('ball'));
+document.getElementById('empty-gapminder').addEventListener('click', loadGapminder);
+document.getElementById('empty-example').addEventListener('click', () => {
+  loadScene(exampleScene());
+  recordChange();
+});
+onGhostChange(updateEmptyCard);
 document.getElementById('btn-share').addEventListener('click', shareScene);
 document.getElementById('btn-redo').addEventListener('click', redo);
 

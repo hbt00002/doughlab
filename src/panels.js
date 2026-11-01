@@ -1,6 +1,6 @@
 import { recordChange } from './history-ui.js';
 import { t } from './i18n.js';
-import { pieces, state } from './state.js';
+import { pieces, state, ghostState } from './state.js';
 import { el, slider, textField, selectField } from './ui.js';
 import { COLORS, DOUGH_TYPES, colorName, isDefaultGroup, rebuildGeometry, updateMaterial, refreshPoints, removePiece, PARAM_SPECS } from './pieces.js';
 import { select, toggleSelection, groupSelection, ungroupSelection, deleteSelection, duplicateSelected } from './selection.js';
@@ -155,7 +155,13 @@ export function renderProps() {
   box.append(el('div', { class: 'btn-row' }, dup, del));
 }
 
+// The start card shows while the stage is completely empty
+export function updateEmptyCard() {
+  document.getElementById('empty-card').hidden = pieces.length > 0 || !!ghostState.table;
+}
+
 export function updateStatus() {
+  updateEmptyCard();
   const total = pieces.reduce((n, p) => n + p.count, 0);
   document.getElementById('status').textContent = t(pieces.length === 1 ? 'status.one' : 'status', { pieces: pieces.length, points: total });
 }

@@ -6,35 +6,35 @@
   <title>DoughLab</title>
   <meta name="description" content="Oyun hamuruyla veri geometrisi: 3B hamur şekilleri yap, onlardan nokta bulutu (veri seti) üret.">
   <link rel="preload" href="fonts/Lexend-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=f72e0b36c8">
+  <link rel="stylesheet" href="style.css?v=42d1325dc9">
   <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-        "./src/analysis-ui.js": "./src/analysis-ui.js?v=f72e0b36c8",
-        "./src/analysis.js": "./src/analysis.js?v=f72e0b36c8",
-        "./src/arrows.js": "./src/arrows.js?v=f72e0b36c8",
-        "./src/autosave.js": "./src/autosave.js?v=f72e0b36c8",
-        "./src/geometry.js": "./src/geometry.js?v=f72e0b36c8",
-        "./src/ghost-data.js": "./src/ghost-data.js?v=f72e0b36c8",
-        "./src/ghost-ui.js": "./src/ghost-ui.js?v=f72e0b36c8",
-        "./src/ghost.js": "./src/ghost.js?v=f72e0b36c8",
-        "./src/history-ui.js": "./src/history-ui.js?v=f72e0b36c8",
-        "./src/history.js": "./src/history.js?v=f72e0b36c8",
-        "./src/i18n.js": "./src/i18n.js?v=f72e0b36c8",
-        "./src/icons.js": "./src/icons.js?v=f72e0b36c8",
-        "./src/main.js": "./src/main.js?v=f72e0b36c8",
-        "./src/panels.js": "./src/panels.js?v=f72e0b36c8",
-        "./src/pieces.js": "./src/pieces.js?v=f72e0b36c8",
-        "./src/sampling.js": "./src/sampling.js?v=f72e0b36c8",
-        "./src/scene.js": "./src/scene.js?v=f72e0b36c8",
-        "./src/selection.js": "./src/selection.js?v=f72e0b36c8",
-        "./src/share.js": "./src/share.js?v=f72e0b36c8",
-        "./src/state.js": "./src/state.js?v=f72e0b36c8",
-        "./src/storage.js": "./src/storage.js?v=f72e0b36c8",
-        "./src/theme.js": "./src/theme.js?v=f72e0b36c8",
-        "./src/ui.js": "./src/ui.js?v=f72e0b36c8"
+        "./src/analysis-ui.js": "./src/analysis-ui.js?v=42d1325dc9",
+        "./src/analysis.js": "./src/analysis.js?v=42d1325dc9",
+        "./src/arrows.js": "./src/arrows.js?v=42d1325dc9",
+        "./src/autosave.js": "./src/autosave.js?v=42d1325dc9",
+        "./src/geometry.js": "./src/geometry.js?v=42d1325dc9",
+        "./src/ghost-data.js": "./src/ghost-data.js?v=42d1325dc9",
+        "./src/ghost-ui.js": "./src/ghost-ui.js?v=42d1325dc9",
+        "./src/ghost.js": "./src/ghost.js?v=42d1325dc9",
+        "./src/history-ui.js": "./src/history-ui.js?v=42d1325dc9",
+        "./src/history.js": "./src/history.js?v=42d1325dc9",
+        "./src/i18n.js": "./src/i18n.js?v=42d1325dc9",
+        "./src/icons.js": "./src/icons.js?v=42d1325dc9",
+        "./src/main.js": "./src/main.js?v=42d1325dc9",
+        "./src/panels.js": "./src/panels.js?v=42d1325dc9",
+        "./src/pieces.js": "./src/pieces.js?v=42d1325dc9",
+        "./src/sampling.js": "./src/sampling.js?v=42d1325dc9",
+        "./src/scene.js": "./src/scene.js?v=42d1325dc9",
+        "./src/selection.js": "./src/selection.js?v=42d1325dc9",
+        "./src/share.js": "./src/share.js?v=42d1325dc9",
+        "./src/state.js": "./src/state.js?v=42d1325dc9",
+        "./src/storage.js": "./src/storage.js?v=42d1325dc9",
+        "./src/theme.js": "./src/theme.js?v=42d1325dc9",
+        "./src/ui.js": "./src/ui.js?v=42d1325dc9"
       }
     }
   </script>
@@ -190,6 +190,16 @@
         </div>
       </div>
     </aside>
+    <section class="empty-card" id="empty-card" aria-labelledby="empty-title" hidden>
+      <h2 id="empty-title" data-i18n="empty.title">Hamurla veri şekillendir</h2>
+      <p data-i18n="empty.text"></p>
+      <div class="empty-actions">
+        <button id="empty-ball" class="primary" data-icon="ball"><span data-i18n="empty.addBall">Top ekle</span></button>
+        <button id="empty-gapminder" data-icon="language"><span data-i18n="empty.gapminder">Gapminder verisini yükle</span></button>
+        <button id="empty-example" data-icon="slab"><span data-i18n="empty.example">Örnek sahneyi aç</span></button>
+      </div>
+      <p class="hint" data-i18n="empty.hint"></p>
+    </section>
     <div class="marquee" id="marquee" hidden></div>
     <div class="toast" id="toast" role="status" hidden></div>
     <div class="tooltip" id="tooltip" hidden></div>
@@ -197,6 +207,6 @@
     <div class="help" id="help"></div>
   </main>
 
-  <script type="module" src="src/main.js?v=f72e0b36c8"></script>
+  <script type="module" src="src/main.js?v=42d1325dc9"></script>
 </body>
 </html>

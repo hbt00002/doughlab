@@ -591,6 +591,28 @@ button.ghost-btn:hover { background: var(--surface-3); }
 .fit-row b { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
 .analysis .fit-row { grid-template-columns: 96px 1fr 50px; }
 
+/* Start card on an empty stage */
+.empty-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(460px, calc(100% - 32px));
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  z-index: 3;
+}
+.empty-card h2 { margin: 0 0 var(--space-2); font-size: var(--fs-xl); }
+.empty-card p { margin: 0 0 var(--space-4); color: var(--text-muted); line-height: 1.55; }
+.empty-card .hint { margin: var(--space-4) 0 0; }
+.empty-actions { display: flex; flex-direction: column; gap: var(--space-2); }
+.empty-actions button { justify-content: flex-start; }
+#empty-ball .icon { color: #f48c2f; }
+#empty-example .icon { color: #2f80ed; }
+
 /* Overlays */
 .link-dialog {
   width: min(520px, calc(100vw - 32px));

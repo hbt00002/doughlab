@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { mulberry32 } from './sampling.js';
-import { pca, pearson, spearman, kendall, etaSquared, linearRegression, projectedVarianceRatio } from './analysis.js';
+import { pca, pearson, spearman, kendall, etaSquared, linearRegression, regressOnColumns, projectedVarianceRatio } from './analysis.js';
 import { makeArrow, placeArrow, disposeArrow } from './arrows.js';
 import { t, pct } from './i18n.js';
-import { pieces, analysisState, state } from './state.js';
+import { pieces, analysisState, state, ghostState } from './state.js';
 import { el } from './ui.js';
 import { scene, SUN_HOME, sun, onSceneTheme } from './scene.js';
 import { updateGhostFit } from './ghost-ui.js';
@@ -43,9 +43,23 @@ onSceneTheme((resolved) => {
   scheduleAnalysis();
 });
 
-// World-space coordinates of every observation in scope, its group label and the piece it came from
+// World-space coordinates of every observation in scope, its group label and its plot colour
 export function collectData() {
-  return collectWorldPoints(analysisState.scope === 'selected' ? selection : pieces);
+  if (analysisState.scope === 'ghost') return collectGhostPoints();
+  return collectWorldPoints(analysisState.scope === 'selected' ? state.selection : pieces);
+}
+
+// The ghost cloud as analysis data; `ghost` carries the CSV variables for the regression tab
+function collectGhostPoints() {
+  const d = ghostState.data;
+  if (!d) return { cols: [[], [], []], groups: [], colors: [], n: 0, ghost: null };
+  const n = d.positions.length / 3;
+  const cols = [0, 1, 2].map((axis) => Float64Array.from({ length: n }, (_, i) => d.positions[i * 3 + axis]));
+  const colors = Array.from({ length: n }, (_, i) => {
+    const [r, g, b] = [0, 1, 2].map((c) => Math.round(d.colors[i * 3 + c] * 255));
+    return `rgb(${r}, ${g}, ${b})`;
+  });
+  return { cols, groups: [], colors, n, ghost: d };
 }
 
 export function collectWorldPoints(source) {
@@ -67,7 +81,8 @@ export function collectWorldPoints(source) {
       owners[k] = pi;
     }
   });
-  return { cols, groups, owners, source, n };
+  const colors = Array.from(owners, (pi) => source[pi].color);
+  return { cols, groups, owners, source, colors, n };
 }
 
 // Fixed-seed sample of row indices, so subsampled statistics and plots don't flicker
@@ -160,6 +175,7 @@ export function scheduleAnalysis() {
 }
 
 export function emptyMessage(data) {
+  if (analysisState.scope === 'ghost') return data.n >= 3 ? '' : t('an.noGhost');
   if (!pieces.length) return t('an.empty');
   if (analysisState.scope === 'selected' && !state.selection.length) return t('an.pick');
   if (data.n < 3) return t('an.few');
@@ -172,19 +188,22 @@ export function runAnalysis() {
   const data = collectData();
   const msg = emptyMessage(data);
   const tab = analysisState.tab;
+  const onGhost = !!data.ghost;
   const fit = msg || tab === 'regression' ? null : pca(data.cols);
 
-  updatePcaAxes(tab === 'regression' ? null : fit);
+  // On the ghost the scene axes already are PCs, so the dough's PCA arrows would only repeat them
+  updatePcaAxes(tab === 'regression' || onGhost ? null : fit);
   setRegressionVisible(false);
   setShadowActive(false);
+  document.getElementById('reg-dough-controls').hidden = onGhost;
 
   const box = document.getElementById(tab === 'pca' ? 'analysis-content' : `${tab}-content`);
   if (msg) {
     box.innerHTML = `<p class="note">${msg}</p>`;
     return;
   }
-  if (tab === 'pca') renderPcaTab(box, data, fit);
-  else if (tab === 'regression') renderRegressionTab(box, data);
+  if (tab === 'pca') onGhost ? renderGhostPcaTab(box, data.ghost) : renderPcaTab(box, data, fit);
+  else if (tab === 'regression') onGhost ? renderGhostRegressionTab(box, data) : renderRegressionTab(box, data);
   else renderShadowTab(box, data, fit);
 }
 
@@ -261,7 +280,7 @@ export function signed(v, digits = 2) {
   return `${v < 0 ? '−' : '+'} ${Math.abs(v).toFixed(digits)}`;
 }
 
-export function renderRegressionTab(box, { cols, owners, source, n }) {
+export function renderRegressionTab(box, { cols, colors, n }) {
   const reg = linearRegression(cols, analysisState.regTarget);
   const [p0, p1] = reg.predictors;
   const tn = AXIS_NAMES[reg.target];
@@ -289,42 +308,136 @@ export function renderRegressionTab(box, { cols, owners, source, n }) {
   regGeometry.computeBoundingSphere();
   setRegressionVisible(analysisState.showPlane);
 
+  const equation = `${tn} = ${reg.intercept.toFixed(2)} ${signed(reg.coef[0])}·${AXIS_NAMES[p0]} ${signed(reg.coef[1])}·${AXIS_NAMES[p1]}`;
+  box.innerHTML = regressionReport(reg, equation, tn, n, [
+    { label: AXIS_NAMES[p0], values: cols[p0] },
+    { label: AXIS_NAMES[p1], values: cols[p1] },
+  ]);
+  plotResiduals(reg, colors, n);
+}
+
+// Shared body of both regression tabs: equation, fit, verdict, residual plot and its reading.
+// `predictors` are { label, values } for the residual-pattern check.
+let residualAxis = null;
+function regressionReport(reg, equation, targetName, n, predictors, onColumns = false) {
   // A curve in the residuals: they still depend on the square of the fitted value or of a predictor.
   // A symmetric bend leaves the fitted value flat, so the predictors are checked too, and the plot
   // uses whichever horizontal axis shows the pattern best.
   const curveScore = (values) => {
-    const m = values.reduce((sum, v) => sum + v, 0) / n;
-    const r = pearson(reg.residuals, values.map((v) => (v - m) ** 2));
+    let m = 0;
+    for (const v of values) m += v / n;
+    const r = pearson(reg.residuals, Array.from(values, (v) => (v - m) ** 2));
     return Number.isFinite(r) ? r * r : 0;
   };
-  const candidates = [
-    { label: t('reg.fitted'), values: reg.fitted },
-    { label: AXIS_NAMES[p0], values: cols[p0] },
-    { label: AXIS_NAMES[p1], values: cols[p1] },
-  ].map((c) => ({ ...c, score: curveScore(c.values) }));
-  const strongest = candidates.reduce((a, b) => (b.score > a.score + 0.05 ? b : a));
-  const curved = reg.r2 < 0.995 && strongest.score > 0.1;
+  const candidates = [{ label: t('reg.fitted'), values: reg.fitted }, ...predictors].map((c) => ({ ...c, score: curveScore(c.values) }));
+  residualAxis = candidates.reduce((a, b) => (b.score > a.score + 0.05 ? b : a));
+  const curved = reg.r2 < 0.995 && residualAxis.score > 0.1;
 
   let html = `<h3>${t('reg.model')} <small>· n = ${n}</small></h3>`;
-  html += `<p class="equation">${tn} = ${reg.intercept.toFixed(2)} ${signed(reg.coef[0])}·${AXIS_NAMES[p0]} ${signed(reg.coef[1])}·${AXIS_NAMES[p1]}</p>`;
+  html += `<p class="equation">${equation}</p>`;
   html += `<h3>${t('reg.fit')}</h3>`;
   html += barRow('R²', reg.r2, 'reg', t('reg.r2Title'));
   html += `<div class="fit-row" title="${t('reg.rmseTitle')}"><span>RMSE</span><span></span><b>${reg.rmse.toFixed(2)}</b></div>`;
-  const verdict = reg.r2 >= 0.8 ? t('reg.strong') : reg.r2 >= 0.4 ? t('reg.medium') : t('reg.weak', { target: tn });
+  // The dough model is a plane in the scene; on CSV columns it is a model of named variables
+  const keys = onColumns ? ['reg.modelStrong', 'reg.modelMedium', 'reg.modelWeak'] : ['reg.strong', 'reg.medium', 'reg.weak'];
+  const verdict = t(keys[reg.r2 >= 0.8 ? 0 : reg.r2 >= 0.4 ? 1 : 2], { target: targetName });
   html += `<p class="shape-verdict">${verdict}</p>`;
   html += `<h3>${t('reg.residuals')}</h3><canvas class="plot" id="residual-plot"></canvas>`;
-  html += `<p class="note">${t('reg.residualAxes', { x: strongest.label })}</p>`;
+  html += `<p class="note">${t('reg.residualAxes', { x: residualAxis.label })}</p>`;
   html += `<p class="shape-verdict">${curved ? t('reg.curved') : t('reg.random')}</p>`;
-  box.innerHTML = html;
+  return html;
+}
 
+function plotResiduals(reg, colors, n) {
   const idx = sampleIndices(n, PLOT_MAX_POINTS) ?? Array.from({ length: n }, (_, i) => i);
   drawScatter(
     document.getElementById('residual-plot'),
-    idx.map((i) => strongest.values[i]),
+    idx.map((i) => residualAxis.values[i]),
     idx.map((i) => reg.residuals[i]),
-    idx.map((i) => source[owners[i]].color),
+    idx.map((i) => colors[i]),
     { zeroLine: true },
   );
+}
+
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const varLabel = (v) => escapeHtml(v.logged ? `log(${v.name})` : v.name);
+
+// Ghost PCA: the variance of the original variables and how each variable loads on the PCs
+function renderGhostPcaTab(box, ghost) {
+  const r = ghost.ratios;
+  let html = `<h3>PCA <small>· n = ${ghost.rowIndex.length}</small></h3>`;
+  r.forEach((ratio, i) => {
+    html += `<div class="pc-row">
+      <span class="pc-name"><span class="pc-swatch" style="background:${PC_COLORS[i]}"></span>PC${i + 1}</span>
+      <span class="pc-bar"><span style="width:${(ratio * 100).toFixed(1)}%"></span></span>
+      <span class="pc-val">${pct(ratio)}</span>
+    </div>`;
+  });
+  html += `<p class="note">${t('ghost.retained', { pct: `<b>${pct(ghost.retained)}</b>` })}</p>`;
+  html += `<p class="shape-verdict">${shapeVerdict(r[0], r[1])}</p>`;
+  // Scene mapping is PC1 → x, PC3 → y, PC2 → z, so the loading vectors are stored in that order
+  html += `<h3>${t('an.ghostLoadings')}</h3><table class="corr"><tr><th></th><th>PC1</th><th>PC2</th><th>PC3</th></tr>`;
+  for (const l of ghost.loadings) {
+    const [pc1, pc3, pc2] = l.dir;
+    html += `<tr><td class="pair">${escapeHtml(l.name)}</td>${heatCell(pc1)}${heatCell(pc2)}${heatCell(pc3)}</tr>`;
+  }
+  html += `</table><p class="note">${t('an.loadings')}</p>`;
+  box.innerHTML = html;
+}
+
+// Ghost regression runs on the CSV's own columns, chosen by name
+function renderGhostRegressionTab(box, { ghost, colors }) {
+  const vars = ghost.variables;
+  const names = vars.map((v) => v.name);
+  if (!names.includes(analysisState.ghostTarget)) analysisState.ghostTarget = names[names.length - 1];
+  const target = analysisState.ghostTarget;
+  let preds = (analysisState.ghostPredictors ?? []).filter((p) => names.includes(p) && p !== target).slice(0, 2);
+  if (!preds.length) preds = names.filter((p) => p !== target).slice(0, 2);
+  analysisState.ghostPredictors = preds;
+
+  const byName = (name) => vars.find((v) => v.name === name);
+  const y = byName(target);
+  const xs = preds.map(byName);
+  const reg = regressOnColumns(y.values, xs.map((v) => v.values));
+  const n = y.values.length;
+
+  const fmtCoef = (v) => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0) ? v.toExponential(2) : v.toFixed(2));
+  const signedCoef = (v) => `${v < 0 ? '−' : '+'} ${fmtCoef(Math.abs(v))}`;
+  const equation = `${varLabel(y)} = ${fmtCoef(reg.intercept)} ${xs.map((x, i) => `${signedCoef(reg.coef[i])}·${varLabel(x)}`).join(' ')}`;
+
+  const options = names.map((name) => `<option value="${escapeHtml(name)}" ${name === target ? 'selected' : ''}>${varLabel(byName(name))}</option>`).join('');
+  const checks = names
+    .filter((name) => name !== target)
+    .map((name) => `<label><input type="checkbox" value="${escapeHtml(name)}" ${preds.includes(name) ? 'checked' : ''}> <span>${varLabel(byName(name))}</span></label>`)
+    .join('');
+  let html = `<label class="field"><span class="field-head">${t('reg.ghostTarget')}</span><select id="ghost-reg-target">${options}</select></label>`;
+  html += `<div class="field"><span class="field-head">${t('reg.ghostPredictors')}</span><div class="checks" id="ghost-reg-preds">${checks}</div></div>`;
+  html += `<p class="note">${t('reg.ghostNoPlane')}</p>`;
+  html += regressionReport(reg, equation, varLabel(y), n, xs.map((x) => ({ label: varLabel(x), values: x.values })), true);
+  box.innerHTML = html;
+  plotResiduals(reg, colors, n);
+
+  document.getElementById('ghost-reg-target').addEventListener('change', (e) => {
+    analysisState.ghostTarget = e.target.value;
+    scheduleAnalysis();
+  });
+  document.getElementById('ghost-reg-preds').addEventListener('change', (e) => {
+    const chosen = [...box.querySelectorAll('#ghost-reg-preds input:checked')].map((i) => i.value);
+    // At most two predictors: the newest tick wins over the oldest one
+    analysisState.ghostPredictors = chosen.length > 2 ? [...preds.filter((p) => p !== e.target.value).slice(-1), e.target.value] : chosen;
+    scheduleAnalysis();
+  });
+}
+
+// The "Ghost data" scope exists only while a ghost is loaded
+export function syncScopeButtons() {
+  const ghostButton = document.querySelector('#analysis-scope [data-scope="ghost"]');
+  ghostButton.disabled = !ghostState.data;
+  if (!ghostState.data && analysisState.scope === 'ghost') {
+    analysisState.scope = 'all';
+    for (const o of document.querySelectorAll('#analysis-scope button')) o.classList.toggle('active', o.dataset.scope === 'all');
+  }
+  scheduleAnalysis();
 }
 
 // Shadow mode: a screen behind the data catches the dough's real shadow and the projected points
@@ -373,7 +486,7 @@ export function syncShadowSliders() {
   }
 }
 
-export function renderShadowTab(box, { cols, owners, source, n }, fit) {
+export function renderShadowTab(box, { cols, colors, n }, fit) {
   const dir = lightDirection();
   const center = new THREE.Vector3(...fit.mean);
 
@@ -426,7 +539,7 @@ export function renderShadowTab(box, { cols, owners, source, n }, fit) {
     document.getElementById('shadow-plot'),
     idx.map((i) => us[i]),
     idx.map((i) => vs[i]),
-    idx.map((i) => source[owners[i]].color),
+    idx.map((i) => colors[i]),
     { equal: true },
   );
 }

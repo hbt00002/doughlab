@@ -36,4 +36,16 @@ test('Gapminder standardised PCA is 46.3 / 25.5 / 19.0 %', () => {
   assert.equal(data.dropped, 0);
 });
 
-test.todo('buildGhostData exposes original variables');
+test('buildGhostData exposes original variables', () => {
+  const table = gapminder();
+  const idx = (name) => table.header.indexOf(name);
+  const names = ['year', 'pop', 'lifeExp', 'gdpPercap'];
+  const data = buildGhostData(table, { columns: names.map(idx), colorBy: -1, standardize: true, logSkewed: true });
+  assert.deepEqual(data.variables.map((v) => v.name), names);
+  const gdp = data.variables.find((v) => v.name === 'gdpPercap');
+  assert.equal(gdp.logged, true);
+  assert.equal(data.variables.find((v) => v.name === 'year').logged, false);
+  const firstRow = table.rows[data.rowIndex[0]];
+  assert.ok(Math.abs(gdp.values[0] - Math.log10(Number(firstRow[idx('gdpPercap')]))) < 1e-9);
+  assert.equal(gdp.values.length, data.rowIndex.length);
+});

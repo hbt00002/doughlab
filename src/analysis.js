@@ -141,48 +141,56 @@ export function etaSquared(values, groups) {
   return ssTotal ? ssBetween / ssTotal : NaN;
 }
 
-// Ordinary least squares of cols[target] on the other two columns.
-// Returns the plane target = intercept + coef[0]·a + coef[1]·b, where [a, b] = predictors.
-export function linearRegression(cols, target) {
-  const predictors = [0, 1, 2].filter((i) => i !== target);
-  const y = cols[target], a = cols[predictors[0]], b = cols[predictors[1]];
+// Ordinary least squares of y on one or two predictor columns:
+// y = intercept + coef[0]·xs[0] (+ coef[1]·xs[1])
+export function regressOnColumns(y, xs) {
   const n = y.length;
-  const my = mean(y), ma = mean(a), mb = mean(b);
-  let saa = 0, sbb = 0, sab = 0, say = 0, sby = 0, syy = 0;
+  const my = mean(y);
+  const mx = xs.map(mean);
+  // Centred sums of squares and cross-products
+  const sxx = xs.map(() => xs.map(() => 0));
+  const sxy = xs.map(() => 0);
+  let syy = 0;
   for (let i = 0; i < n; i++) {
-    const da = a[i] - ma, db = b[i] - mb, dy = y[i] - my;
-    saa += da * da;
-    sbb += db * db;
-    sab += da * db;
-    say += da * dy;
-    sby += db * dy;
+    const dy = y[i] - my;
     syy += dy * dy;
+    for (let a = 0; a < xs.length; a++) {
+      const da = xs[a][i] - mx[a];
+      sxy[a] += da * dy;
+      for (let b = a; b < xs.length; b++) sxx[a][b] += da * (xs[b][i] - mx[b]);
+    }
   }
-  // Normal equations on centred data; a near-singular system means the predictors are collinear
-  const det = saa * sbb - sab * sab;
-  const coef = Math.abs(det) > 1e-12 * (saa * sbb || 1)
-    ? [(say * sbb - sby * sab) / det, (sby * saa - say * sab) / det]
-    : [saa ? say / saa : 0, 0];
-  const intercept = my - coef[0] * ma - coef[1] * mb;
+
+  let coef;
+  if (xs.length === 1) {
+    coef = [sxx[0][0] ? sxy[0] / sxx[0][0] : 0];
+  } else {
+    // Normal equations; a near-singular system means the predictors are collinear
+    const [saa, sab, sbb] = [sxx[0][0], sxx[0][1], sxx[1][1]];
+    const det = saa * sbb - sab * sab;
+    coef = Math.abs(det) > 1e-12 * (saa * sbb || 1)
+      ? [(sxy[0] * sbb - sxy[1] * sab) / det, (sxy[1] * saa - sxy[0] * sab) / det]
+      : [saa ? sxy[0] / saa : 0, 0];
+  }
+  const intercept = my - coef.reduce((t, c, a) => t + c * mx[a], 0);
 
   const fitted = new Float64Array(n);
   const residuals = new Float64Array(n);
   let sse = 0;
   for (let i = 0; i < n; i++) {
-    fitted[i] = intercept + coef[0] * a[i] + coef[1] * b[i];
-    residuals[i] = y[i] - fitted[i];
+    let f = intercept;
+    for (let a = 0; a < xs.length; a++) f += coef[a] * xs[a][i];
+    fitted[i] = f;
+    residuals[i] = y[i] - f;
     sse += residuals[i] ** 2;
   }
-  return {
-    target,
-    predictors,
-    intercept,
-    coef,
-    r2: syy ? 1 - sse / syy : NaN,
-    rmse: Math.sqrt(sse / n),
-    fitted,
-    residuals,
-  };
+  return { intercept, coef, r2: syy ? 1 - sse / syy : NaN, rmse: Math.sqrt(sse / n), fitted, residuals };
+}
+
+// Regression plane of cols[target] on the other two scene axes, [a, b] = predictors
+export function linearRegression(cols, target) {
+  const predictors = [0, 1, 2].filter((i) => i !== target);
+  return { target, predictors, ...regressOnColumns(cols[target], predictors.map((i) => cols[i])) };
 }
 
 // Share of the total variance that survives projecting along the unit vector `dir`

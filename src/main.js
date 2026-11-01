@@ -10,7 +10,7 @@ import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
 import { deleteSelection, setMode, duplicateSelected } from './selection.js';
 import { renderList, renderProps, updateStatus, updateEmptyCard } from './panels.js';
-import { scheduleAnalysis, syncShadowSliders, lightAlongPC } from './analysis-ui.js';
+import { scheduleAnalysis, syncShadowSliders, lightAlongPC, syncScopeButtons } from './analysis-ui.js';
 import { renderGhostSettings, updateGhostFit, gapminderButton, loadGapminder, onGhostChange } from './ghost-ui.js';
 
 // ---------------------------------------------------------------------------
@@ -175,6 +175,7 @@ document.getElementById('empty-example').addEventListener('click', () => {
   recordChange();
 });
 onGhostChange(updateEmptyCard);
+onGhostChange(syncScopeButtons);
 document.getElementById('btn-share').addEventListener('click', shareScene);
 document.getElementById('btn-redo').addEventListener('click', redo);
 

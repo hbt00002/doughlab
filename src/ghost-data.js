@@ -115,6 +115,13 @@ export function buildGhostData(table, { columns, colorBy, standardize, logSkewed
     });
   }
 
+  // The variables as the user sees them (after any log), kept for regression on real columns
+  const variables = X.map((col, j) => ({
+    name: header[columns[j]],
+    logged: logged.includes(header[columns[j]]),
+    values: Float64Array.from(col),
+  }));
+
   // Centre every variable; standardising puts different units on equal footing
   for (const col of X) {
     const m = mean(col);
@@ -188,6 +195,7 @@ export function buildGhostData(table, { columns, colorBy, standardize, logSkewed
     retained: top.reduce((t, c) => t + c.ratio, 0),
     loadings,
     logged,
+    variables,
     categories,
     dropped: rows.length - n,
     center: [0, lift, 0],

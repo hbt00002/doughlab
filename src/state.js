@@ -13,6 +13,9 @@ export const analysisState = {
   showPlane: true,
   azimuth: 35,
   elevation: 55,
+  // Ghost-scope regression, by CSV column name
+  ghostTarget: null,
+  ghostPredictors: [],
 };
 export const ghostState = {
   table: null,

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pca, pearson, spearman, kendall, etaSquared, linearRegression, projectedVarianceRatio } from '../src/analysis.js';
+import { pca, pearson, spearman, kendall, etaSquared, linearRegression, projectedVarianceRatio, regressOnColumns } from '../src/analysis.js';
 
 // Same seeded generator as src/sampling.js, which can't be imported here because it needs Three.js
 function mulberry32(seed) {
@@ -57,4 +57,24 @@ test('projected variance along PC3 equals PC1+PC2', () => {
   const cols = randomCols(500, 3);
   const c = pca(cols).components;
   close(projectedVarianceRatio(cols, c[2].vector), c[0].ratio + c[1].ratio);
+});
+
+test('regressOnColumns with one predictor matches the closed form', () => {
+  const x = [0, 1, 2, 3, 4];
+  const reg = regressOnColumns(x.map((v) => 3 + 2 * v), [x]);
+  close(reg.intercept, 3);
+  assert.equal(reg.coef.length, 1);
+  close(reg.coef[0], 2);
+  close(reg.r2, 1);
+});
+
+test('regressOnColumns with two predictors matches linearRegression', () => {
+  const cols = randomCols(300, 11);
+  const y = cols[1].map((v, i) => v + 0.2 * Math.sin(i));
+  const viaCols = regressOnColumns(y, [cols[0], cols[2]]);
+  const viaPlane = linearRegression([cols[0], y, cols[2]], 1);
+  close(viaCols.intercept, viaPlane.intercept);
+  close(viaCols.coef[0], viaPlane.coef[0]);
+  close(viaCols.coef[1], viaPlane.coef[1]);
+  close(viaCols.r2, viaPlane.r2);
 });

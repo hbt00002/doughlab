@@ -4,6 +4,7 @@ import { icon, renderIcons } from './icons.js';
 import { applySceneTheme } from './scene.js';
 import { recordChange, resetHistory, undo, redo } from './history-ui.js';
 import { restoreAutosave } from './autosave.js';
+import { shareScene, openSharedLink } from './share.js';
 import { isTouch, pieces, settings, analysisState } from './state.js';
 import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
@@ -167,6 +168,7 @@ densityInput.addEventListener('input', () => {
 densityInput.addEventListener('change', recordChange);
 
 document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-share').addEventListener('click', shareScene);
 document.getElementById('btn-redo').addEventListener('click', redo);
 
 for (const b of document.querySelectorAll('#shape-buttons button')) {
@@ -216,5 +218,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 renderIcons();
 initTheme(applySceneTheme);
 applyLanguage();
-restoreAutosave();
+const autosaveGhost = restoreAutosave();
 resetHistory();
+// A shared link waits for the autosaved ghost so it can replace it rather than race it
+autosaveGhost.then(openSharedLink);

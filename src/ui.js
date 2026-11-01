@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 
 export function showToast(text) {
   const toast = document.getElementById('toast');
@@ -66,4 +67,28 @@ export function checkbox(label, checked, onChange) {
   input.checked = checked;
   input.addEventListener('change', () => onChange(input.checked));
   return el('label', { class: 'toggle' }, input, el('span', {}, label));
+}
+
+// Shows a link in a dialog with a copy button, for when the clipboard can't be written directly
+export function showLinkDialog(url) {
+  const dialog = el('dialog', { class: 'link-dialog', 'aria-labelledby': 'link-dialog-title' });
+  const input = el('input', { type: 'text', readonly: '', value: url, 'aria-label': t('dialog.linkTitle') });
+  const copy = el('button', { class: 'primary' }, t('dialog.copy'));
+  const close = el('button', {}, t('dialog.close'));
+  copy.addEventListener('click', async () => {
+    input.select();
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      document.execCommand?.('copy');
+    }
+    copy.textContent = t('dialog.copied');
+  });
+  close.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => dialog.remove());
+  dialog.append(el('h2', { id: 'link-dialog-title' }, t('dialog.linkTitle')), input, el('div', { class: 'btn-row' }, copy, close));
+  document.body.append(dialog);
+  dialog.showModal();
+  input.focus();
+  input.select();
 }

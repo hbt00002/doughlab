@@ -43,11 +43,11 @@ export function applyPayload(payload) {
 // Startup: brings back the previous session's work, if any
 export function restoreAutosave() {
   const saved = loadLocal(AUTOSAVE_KEY);
-  if (!saved) return;
+  if (!saved) return Promise.resolve();
   restoring = true;
   const { loaded, ghost } = applyPayload(saved);
-  ghost.finally(() => {
+  if (loaded) showToast(t('toast.restored'));
+  return ghost.finally(() => {
     restoring = false;
   });
-  if (loaded) showToast(t('toast.restored'));
 }

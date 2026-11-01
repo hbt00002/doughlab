@@ -1,6 +1,6 @@
 // Interface strings in Turkish and English. `{name}` placeholders are filled by t().
 
-const STRINGS = {
+export const STRINGS = {
   tr: {
     'meta.description': 'Oyun hamuruyla veri geometrisi: 3B hamur şekilleri yap, onlardan nokta bulutu (veri seti) üret.',
     'brand.tagline': 'Oyun hamuruyla veri geometrisi',

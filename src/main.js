@@ -122,14 +122,45 @@ gizmo.setSize(isTouch ? 1.4 : 0.9);
 gizmo.addEventListener('dragging-changed', (e) => {
   orbit.enabled = !e.value;
   // Scaling changes the volume, so the observation count has to be recomputed
-  if (!e.value && selected) {
-    refreshPoints(selected);
+  if (!e.value && selection.length) {
+    selection.forEach(refreshPoints);
+    if (gizmo.object === pivot) capturePivot();
     renderList();
     updateStatus();
   }
 });
-gizmo.addEventListener('objectChange', () => scheduleAnalysis());
+gizmo.addEventListener('objectChange', () => {
+  if (gizmo.object === pivot) applyPivot();
+  scheduleAnalysis();
+});
 scene.add(gizmo.getHelper ? gizmo.getHelper() : gizmo);
+
+// With several pieces selected the gizmo drives an invisible pivot at their centre,
+// and every piece follows the pivot's change since the drag started
+const pivot = new THREE.Object3D();
+scene.add(pivot);
+let pivotStart = null;
+
+function capturePivot() {
+  pivot.updateMatrixWorld();
+  pivotStart = {
+    inverse: pivot.matrixWorld.clone().invert(),
+    members: selection.map((p) => {
+      p.mesh.updateMatrixWorld();
+      return { mesh: p.mesh, matrix: p.mesh.matrixWorld.clone() };
+    }),
+  };
+}
+
+function applyPivot() {
+  if (!pivotStart) return;
+  pivot.updateMatrixWorld();
+  const delta = pivot.matrixWorld.clone().multiply(pivotStart.inverse);
+  const m = new THREE.Matrix4();
+  for (const { mesh, matrix } of pivotStart.members) {
+    m.multiplyMatrices(delta, matrix).decompose(mesh.position, mesh.quaternion, mesh.scale);
+  }
+}
 
 new ResizeObserver(() => {
   const { clientWidth: w, clientHeight: h } = viewport;
@@ -151,7 +182,11 @@ renderer.setAnimationLoop(() => {
 const pieces = [];
 const typeCounters = { ball: 0, snake: 0, slab: 0 };
 const settings = { density: 60, view: 'dough' };
+// Every selected piece; `selected` is the one being edited when exactly one is selected
+let selection = [];
 let selected = null;
+// Pieces grouped with Ctrl+G share a link id, so they are selected and moved together
+let linkCounter = 0;
 
 function setVec(target, value) {
   if (!value) return;
@@ -171,6 +206,7 @@ function createPiece(type, opts = {}) {
     texture: opts.texture ?? 0.2,
     params: { ...SHAPES[type].params, ...opts.params },
     seed: opts.seed ?? Math.floor(Math.random() * 2 ** 31),
+    link: typeof opts.link === 'string' ? opts.link : null,
     count: 0,
     points: null,
   };
@@ -245,21 +281,25 @@ function refreshPoints(piece) {
 }
 
 function removePiece(piece) {
-  if (selected === piece) select(null);
+  if (selection.includes(piece)) setSelection(selection.filter((p) => p !== piece), false);
   scene.remove(piece.mesh);
   piece.mesh.geometry.dispose();
   piece.mesh.material.dispose();
   piece.points.geometry.dispose();
   piece.points.material.dispose();
   pieces.splice(pieces.indexOf(piece), 1);
+  // A group of one is no group
+  const rest = pieces.filter((p) => piece.link && p.link === piece.link);
+  if (rest.length === 1) rest[0].link = null;
   renderList();
   updateStatus();
   scheduleAnalysis();
 }
 
-function duplicatePiece(piece) {
+function duplicatePiece(piece, link = null) {
   const m = piece.mesh;
   return createPiece(piece.type, {
+    link,
     name: t('props.copy', { name: piece.name }),
     group: piece.group,
     color: piece.color,
@@ -292,15 +332,87 @@ function clearScene() {
 // Selection and picking
 // ---------------------------------------------------------------------------
 
-function select(piece) {
-  selected = piece;
-  if (piece) gizmo.attach(piece.mesh);
-  else gizmo.detach();
-  document.getElementById('tool-duplicate').disabled = !piece;
-  document.getElementById('tool-delete').disabled = !piece;
+// The given pieces plus everything grouped with them
+function withLinked(list) {
+  const links = new Set(list.map((p) => p.link).filter(Boolean));
+  return pieces.filter((p) => list.includes(p) || links.has(p.link));
+}
+
+function setSelection(list, render = true) {
+  selection = withLinked(list);
+  selected = selection.length === 1 ? selection[0] : null;
+  attachGizmo();
+  document.getElementById('tool-duplicate').disabled = !selection.length;
+  document.getElementById('tool-delete').disabled = !selection.length;
+  if (!render) return;
   renderList();
   renderProps();
   if (analysisState.scope === 'selected') scheduleAnalysis();
+}
+
+function select(piece) {
+  setSelection(piece ? [piece] : []);
+}
+
+// Shift+click: add the piece (and its group) or take it out again
+function toggleSelection(piece) {
+  const group = withLinked([piece]);
+  const allIn = group.every((p) => selection.includes(p));
+  setSelection(allIn ? selection.filter((p) => !group.includes(p)) : [...selection, ...group]);
+}
+
+function attachGizmo() {
+  pivotStart = null;
+  if (!selection.length) gizmo.detach();
+  else if (selection.length === 1) gizmo.attach(selection[0].mesh);
+  else {
+    pivot.position.set(0, 0, 0);
+    for (const p of selection) pivot.position.add(p.mesh.position);
+    pivot.position.divideScalar(selection.length);
+    pivot.quaternion.identity();
+    pivot.scale.set(1, 1, 1);
+    capturePivot();
+    gizmo.attach(pivot);
+  }
+}
+
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.hidden = false;
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => (toast.hidden = true), 3200);
+}
+
+// Ctrl+G: the pieces share the first selected piece's group name and move as one
+function groupSelection() {
+  if (selection.length < 2) {
+    showToast(t('toast.needTwo'));
+    return;
+  }
+  const link = `g${++linkCounter}`;
+  const name = selection[0].group;
+  for (const p of selection) {
+    p.link = link;
+    p.group = name;
+  }
+  showToast(t('toast.grouped', { n: selection.length, name }));
+  renderList();
+  renderProps();
+  scheduleAnalysis();
+}
+
+// Ctrl+Shift+G: the pieces move on their own again; their group names stay
+function ungroupSelection() {
+  if (!selection.some((p) => p.link)) return;
+  for (const p of selection) p.link = null;
+  showToast(t('toast.ungrouped'));
+  renderList();
+  renderProps();
+}
+
+function deleteSelection() {
+  for (const p of [...selection]) removePiece(p);
 }
 
 function setMode(mode) {
@@ -330,22 +442,86 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   // Ignore camera drags and clicks on the gizmo handles; fingers wobble more than a mouse
   if (moved > (e.pointerType === 'mouse' ? 4 : 10) || gizmo.dragging || gizmo.axis) return;
   rayFromEvent(e);
-  const hit = raycaster.intersectObjects(pieces.map((p) => p.mesh), false)[0];
-  select(hit ? hit.object.userData.piece : null);
+  const hit = raycaster.intersectObjects(pieces.map((p) => p.mesh), false)[0]?.object.userData.piece;
+  if (e.shiftKey) {
+    if (hit) toggleSelection(hit);
+  } else select(hit ?? null);
   // There is no hover on a touch screen, so a tap on a ghost point shows its row instead
   if (e.pointerType !== 'mouse') showGhostRow(hit ? null : e);
 });
 
+// Shift + drag draws a selection box. Listening in the capture phase on the parent
+// lets us switch the camera controls off before they see the pointerdown.
+const marquee = document.getElementById('marquee');
+let box = null;
+viewport.addEventListener(
+  'pointerdown',
+  (e) => {
+    if (!e.shiftKey || e.button !== 0 || gizmo.axis) return;
+    orbit.enabled = false;
+    box = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY };
+  },
+  true,
+);
+window.addEventListener('pointermove', (e) => {
+  if (!box) return;
+  box.x1 = e.clientX;
+  box.y1 = e.clientY;
+  const stage = viewport.getBoundingClientRect();
+  Object.assign(marquee.style, {
+    left: `${Math.min(box.x0, box.x1) - stage.left}px`,
+    top: `${Math.min(box.y0, box.y1) - stage.top}px`,
+    width: `${Math.abs(box.x1 - box.x0)}px`,
+    height: `${Math.abs(box.y1 - box.y0)}px`,
+  });
+  marquee.hidden = Math.hypot(box.x1 - box.x0, box.y1 - box.y0) < 4;
+});
+window.addEventListener('pointerup', () => {
+  if (!box) return;
+  const b = box;
+  box = null;
+  orbit.enabled = true;
+  if (marquee.hidden) return; // too small: it was a Shift+click, handled above
+  marquee.hidden = true;
+  setSelection(piecesInRect(Math.min(b.x0, b.x1), Math.min(b.y0, b.y1), Math.max(b.x0, b.x1), Math.max(b.y0, b.y1)));
+});
+
+// Pieces whose centre is inside a rectangle given in client (screen) coordinates
+function piecesInRect(left, top, right, bottom) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const v = new THREE.Vector3();
+  return pieces.filter((p) => {
+    const geo = p.mesh.geometry;
+    if (!geo.boundingSphere) geo.computeBoundingSphere();
+    p.mesh.updateMatrixWorld();
+    v.copy(geo.boundingSphere.center).applyMatrix4(p.mesh.matrixWorld).project(camera);
+    if (v.z < -1 || v.z > 1) return false; // behind the camera
+    const x = rect.left + ((v.x + 1) / 2) * rect.width;
+    const y = rect.top + ((1 - v.y) / 2) * rect.height;
+    return x >= left && x <= right && y >= top && y <= bottom;
+  });
+}
+
 window.addEventListener('keydown', (e) => {
   if (e.target instanceof Element && e.target.closest('input, select, textarea')) return;
   const k = e.key.toLowerCase();
-  if (k === 'd' && (e.ctrlKey || e.metaKey)) {
+  const ctrl = e.ctrlKey || e.metaKey;
+  if (k === 'd' && ctrl) {
     e.preventDefault();
     duplicateSelected();
-  } else if (k === 'w') setMode('translate');
+  } else if (k === 'g' && ctrl) {
+    // Overrides the browser's "find next"
+    e.preventDefault();
+    if (e.shiftKey) ungroupSelection();
+    else groupSelection();
+  } else if (k === 'a' && ctrl) {
+    e.preventDefault();
+    setSelection(pieces);
+  } else if (ctrl || e.altKey) return;
+  else if (k === 'w') setMode('translate');
   else if (k === 'e') setMode('rotate');
   else if (k === 'r') setMode('scale');
-  else if ((k === 'delete' || k === 'backspace') && selected) removePiece(selected);
+  else if (k === 'delete' || k === 'backspace') deleteSelection();
   else if (k === 'escape') select(null);
 });
 
@@ -403,24 +579,64 @@ function renderList() {
     list.append(el('p', { class: 'empty' }, t('list.empty')));
     return;
   }
+  // Number the groups in list order so the badge reads "G1", "G2", …
+  const linkNumbers = new Map();
+  for (const p of pieces) if (p.link && !linkNumbers.has(p.link)) linkNumbers.set(p.link, linkNumbers.size + 1);
   for (const p of pieces) {
     const dot = el('span', { class: 'dot' });
     dot.style.background = p.color;
     const row = el(
       'button',
-      { class: 'piece-row' + (p === selected ? ' active' : '') },
+      { class: 'piece-row' + (selection.includes(p) ? ' active' : '') },
       dot,
       el('span', { class: 'pname' }, p.name),
-      el('span', { class: 'pmeta' }, t('list.points', { n: p.count })),
     );
-    row.addEventListener('click', () => select(p));
+    if (p.link) {
+      const n = linkNumbers.get(p.link);
+      row.append(el('span', { class: 'link-badge', title: t('list.linked', { n }) }, `G${n}`));
+    }
+    row.append(el('span', { class: 'pmeta' }, t('list.points', { n: p.count })));
+    row.addEventListener('click', (e) => (e.shiftKey ? toggleSelection(p) : select(p)));
     list.append(row);
   }
+}
+
+// Several pieces selected: shared group name, grouping and bulk actions
+function renderMultiProps(box) {
+  const names = selection.map((p) => p.name).join(', ');
+  const groups = new Set(selection.map((p) => p.group));
+  const linked = selection.every((p) => p.link && p.link === selection[0].link);
+  const group = textField(t('props.groupAll'), groups.size === 1 ? selection[0].group : '', (v) => {
+    for (const p of selection) p.group = v;
+    scheduleAnalysis();
+  });
+  if (groups.size > 1) group.input.placeholder = t('props.mixed');
+
+  const groupButton = el('button', { title: 'Ctrl+G' }, t('tool.group'));
+  groupButton.addEventListener('click', groupSelection);
+  const ungroupButton = el('button', { title: 'Ctrl+Shift+G' }, t('tool.ungroup'));
+  ungroupButton.addEventListener('click', ungroupSelection);
+  ungroupButton.disabled = !selection.some((p) => p.link);
+  const dup = el('button', {}, t('tool.duplicate'));
+  dup.addEventListener('click', duplicateSelected);
+  const del = el('button', { class: 'danger' }, t('tool.delete'));
+  del.addEventListener('click', deleteSelection);
+
+  box.append(
+    el('p', { class: 'multi-head' }, el('b', {}, t('props.multi', { n: selection.length })), el('span', {}, names)),
+    group.node,
+    el('p', { class: 'hint' }, linked ? t('props.linked') : t('props.groupHint')),
+    el('div', { class: 'btn-row' }, linked ? ungroupButton : groupButton, ...(linked ? [] : [ungroupButton]), dup, del),
+  );
 }
 
 function renderProps() {
   const box = document.getElementById('props');
   box.replaceChildren();
+  if (selection.length > 1) {
+    renderMultiProps(box);
+    return;
+  }
   if (!selected) {
     box.append(el('p', { class: 'empty' }, t('props.empty')));
     return;
@@ -494,9 +710,15 @@ function renderProps() {
   box.append(el('div', { class: 'btn-row' }, dup, del));
 }
 
+// Copies stay grouped with each other, not with the originals
 function duplicateSelected() {
-  if (!selected) return;
-  select(duplicatePiece(selected));
+  if (!selection.length) return;
+  const newLinks = new Map();
+  const copies = selection.map((p) => {
+    if (p.link && !newLinks.has(p.link)) newLinks.set(p.link, `g${++linkCounter}`);
+    return duplicatePiece(p, p.link ? newLinks.get(p.link) : null);
+  });
+  setSelection(copies);
   updateStatus();
 }
 
@@ -547,6 +769,7 @@ function serializeScene() {
       dough: p.dough,
       texture: p.texture,
       seed: p.seed,
+      ...(p.link ? { link: p.link } : {}),
       params: p.params,
       position: p.mesh.position.toArray(),
       rotation: p.mesh.rotation.toArray(),
@@ -567,6 +790,8 @@ function loadScene(data) {
     }
     createPiece(d.type, { ...d, params });
   }
+  // New groups must not reuse an id from the file
+  linkCounter = Math.max(0, ...pieces.map((p) => parseInt(p.link?.slice(1), 10) || 0));
   select(null);
   updateStatus();
 }
@@ -619,7 +844,7 @@ const pcaAxes = PC_COLORS.map((c, i) => {
 
 // World-space coordinates of every observation in scope, its group label and the piece it came from
 function collectData() {
-  return collectWorldPoints(analysisState.scope === 'selected' ? (selected ? [selected] : []) : pieces);
+  return collectWorldPoints(analysisState.scope === 'selected' ? selection : pieces);
 }
 
 function collectWorldPoints(source) {
@@ -736,7 +961,7 @@ function scheduleAnalysis() {
 
 function emptyMessage(data) {
   if (!pieces.length) return t('an.empty');
-  if (analysisState.scope === 'selected' && !selected) return t('an.pick');
+  if (analysisState.scope === 'selected' && !selection.length) return t('an.pick');
   if (data.n < 3) return t('an.few');
   return '';
 }
@@ -1339,7 +1564,7 @@ document.getElementById('shadow-worst').addEventListener('click', () => lightAlo
 syncShadowSliders();
 
 document.getElementById('tool-duplicate').addEventListener('click', duplicateSelected);
-document.getElementById('tool-delete').addEventListener('click', () => selected && removePiece(selected));
+document.getElementById('tool-delete').addEventListener('click', deleteSelection);
 
 // Static labels come from data-i18n attributes; dynamic panels are re-rendered
 function applyLanguage() {

@@ -47,6 +47,8 @@ DoughLab, bir veri bilimi dersindeki ödevden doğdu: Gapminder verisinin 3B PCA
 ### Modelleme
 - **Üç parça türü:** top, yılan ve levha. Yılan ile levha bükülebilir.
 - **Taşı, döndür ve ölçekle** araçları; çoğaltma ve silme.
+- **Çoklu seçim:** `Shift` + tık ile parça ekle / çıkar ya da `Shift` + sürükle ile mavi seçim kutusu çiz. Seçili parçalar birlikte taşınır, döndürülür ve ölçeklenir.
+- **Gruplama:** `Ctrl` + `G` seçili parçalara ilk seçilenin grup adını verir (verideki aynı kategori) ve onları birbirine bağlar; artık birlikte seçilip taşınırlar. `Ctrl` + `Shift` + `G` bağı çözer.
 - Her parça için **renk**, **hamur türü** (klasik, parlak, simli) ve **doku** ayarı.
 - Sahneyi **JSON olarak kaydet / aç**; modellerini başkalarıyla paylaş.
 
@@ -134,12 +136,16 @@ Ardından tarayıcıda `http://localhost:8000` adresine git.
 | Eylem | Kontrol |
 |---|---|
 | Parça seç | Sol tık |
+| Seçime ekle / çıkar | `Shift` + tık |
+| Kutu ile çoklu seç | `Shift` + sürükle |
+| Tümünü seç | `Ctrl` + `A` |
+| Gruplandır / grubu çöz | `Ctrl` + `G` / `Ctrl` + `Shift` + `G` |
 | Kamerayı döndür | Sol tuşla sürükle |
 | Kamerayı kaydır | Sağ tuşla sürükle |
 | Yakınlaş / uzaklaş | Fare tekerleği |
 | Taşı / döndür / ölçekle | `W` / `E` / `R` |
-| Seçili parçayı sil | `Delete` veya `Backspace` |
-| Seçili parçayı çoğalt | `Ctrl` + `D` |
+| Seçili parçaları sil | `Delete` veya `Backspace` |
+| Seçili parçaları çoğalt | `Ctrl` + `D` |
 | Seçimi kaldır | `Esc` |
 
 ### Dokunmatik ekran

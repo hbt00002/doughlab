@@ -49,6 +49,8 @@ DoughLab grew out of a data science course assignment: model the 3D PCA plot of 
 ### Modelling
 - **Three piece types:** ball, snake and slab. Snakes and slabs can be bent.
 - **Move, rotate and scale** gizmos; duplicate and delete.
+- **Multi-select:** `Shift` + click adds or removes a piece, `Shift` + drag draws a blue selection box. Selected pieces move, rotate and scale together.
+- **Grouping:** `Ctrl` + `G` gives the selected pieces the first selected piece's group name (the same category in the data) and links them, so they are selected and moved together. `Ctrl` + `Shift` + `G` ungroups them.
 - Per-piece **colour**, **dough type** (classic, glossy, glitter) and **texture**.
 - **Save / load scenes as JSON** to share your models.
 
@@ -136,12 +138,16 @@ Then open `http://localhost:8000`.
 | Action | Control |
 |---|---|
 | Select a piece | Left click |
+| Add to / remove from selection | `Shift` + click |
+| Box select | `Shift` + drag |
+| Select all | `Ctrl` + `A` |
+| Group / ungroup | `Ctrl` + `G` / `Ctrl` + `Shift` + `G` |
 | Orbit the camera | Left drag |
 | Pan the camera | Right drag |
 | Zoom | Mouse wheel |
 | Move / rotate / scale | `W` / `E` / `R` |
-| Delete selected piece | `Delete` or `Backspace` |
-| Duplicate selected piece | `Ctrl` + `D` |
+| Delete selected pieces | `Delete` or `Backspace` |
+| Duplicate selected pieces | `Ctrl` + `D` |
 | Clear selection | `Esc` |
 
 ### Touch screen

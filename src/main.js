@@ -1,4 +1,7 @@
 import { t, setLang, getLang, errorText } from './i18n.js';
+import { initTheme, cycleThemeMode, getThemeMode } from './theme.js';
+import { icon, renderIcons } from './icons.js';
+import { applySceneTheme } from './scene.js';
 import { isTouch, pieces, settings, analysisState } from './state.js';
 import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
@@ -90,7 +93,8 @@ function applyLanguage() {
   const keys = { translate: 'W', rotate: 'E', scale: 'R' };
   for (const b of document.querySelectorAll('#mode-buttons button')) b.title = t('mode.shortcut', { key: keys[b.dataset.mode] });
   document.getElementById('help').textContent = t(isTouch ? 'help.touch' : 'help.mouse');
-  document.getElementById('lang-toggle').textContent = lang === 'tr' ? 'EN' : 'TR';
+  document.getElementById('lang-label').textContent = lang === 'tr' ? 'EN' : 'TR';
+  updateThemeButtons();
   setAnalysisCollapsed(analysisPanel.classList.contains('collapsed'));
   if (!gapminderButton.disabled) gapminderButton.textContent = t('ghost.gapminder');
   renderList();
@@ -101,7 +105,7 @@ function applyLanguage() {
   scheduleAnalysis();
 }
 
-document.getElementById('lang-toggle').addEventListener('click', () => {
+function toggleLanguage() {
   setLang(getLang() === 'tr' ? 'en' : 'tr');
   try {
     localStorage.setItem(LANG_KEY, getLang());
@@ -109,6 +113,47 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
     // Not saved; the choice still applies to this visit
   }
   applyLanguage();
+}
+document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+document.getElementById('more-lang').addEventListener('click', toggleLanguage);
+
+// Theme: the button shows the current mode (auto / light / dark) and cycles through them
+const THEME_ICONS = { auto: 'auto', light: 'sun', dark: 'moon' };
+function updateThemeButtons() {
+  const mode = getThemeMode();
+  const label = t('theme.label', { mode: t(`theme.${mode}`) });
+  for (const id of ['theme-toggle', 'more-theme']) {
+    const button = document.getElementById(id);
+    button.querySelector('svg.icon')?.replaceWith(icon(THEME_ICONS[mode]));
+    button.setAttribute('aria-label', label);
+    button.title = label;
+  }
+  document.getElementById('theme-label').textContent = t(`theme.${mode}`);
+  document.getElementById('more-theme-label').textContent = label;
+}
+function cycleTheme() {
+  cycleThemeMode();
+  updateThemeButtons();
+}
+document.getElementById('theme-toggle').addEventListener('click', cycleTheme);
+document.getElementById('more-theme').addEventListener('click', cycleTheme);
+
+// Narrow screens keep theme and language behind a "more" menu
+const moreToggle = document.getElementById('more-toggle');
+const moreMenu = document.getElementById('more-menu');
+function setMoreOpen(open) {
+  moreMenu.hidden = !open;
+  moreToggle.setAttribute('aria-expanded', open);
+}
+moreToggle.addEventListener('click', () => setMoreOpen(moreMenu.hidden));
+document.addEventListener('click', (e) => {
+  if (!moreMenu.hidden && !e.target.closest('#more-wrap')) setMoreOpen(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !moreMenu.hidden) {
+    setMoreOpen(false);
+    moreToggle.focus();
+  }
 });
 
 densityInput.addEventListener('input', () => {
@@ -159,4 +204,6 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   }
 });
 
+renderIcons();
+initTheme(applySceneTheme);
 applyLanguage();

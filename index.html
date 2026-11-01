@@ -5,48 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DoughLab</title>
   <meta name="description" content="Oyun hamuruyla veri geometrisi: 3B hamur şekilleri yap, onlardan nokta bulutu (veri seti) üret.">
-  <link rel="stylesheet" href="style.css?v=fff8582e5c">
+  <link rel="preload" href="fonts/Lexend-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css?v=93ee0eef03">
   <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-        "./src/analysis-ui.js": "./src/analysis-ui.js?v=fff8582e5c",
-        "./src/analysis.js": "./src/analysis.js?v=fff8582e5c",
-        "./src/arrows.js": "./src/arrows.js?v=fff8582e5c",
-        "./src/geometry.js": "./src/geometry.js?v=fff8582e5c",
-        "./src/ghost-data.js": "./src/ghost-data.js?v=fff8582e5c",
-        "./src/ghost-ui.js": "./src/ghost-ui.js?v=fff8582e5c",
-        "./src/ghost.js": "./src/ghost.js?v=fff8582e5c",
-        "./src/i18n.js": "./src/i18n.js?v=fff8582e5c",
-        "./src/main.js": "./src/main.js?v=fff8582e5c",
-        "./src/panels.js": "./src/panels.js?v=fff8582e5c",
-        "./src/pieces.js": "./src/pieces.js?v=fff8582e5c",
-        "./src/sampling.js": "./src/sampling.js?v=fff8582e5c",
-        "./src/scene.js": "./src/scene.js?v=fff8582e5c",
-        "./src/selection.js": "./src/selection.js?v=fff8582e5c",
-        "./src/state.js": "./src/state.js?v=fff8582e5c",
-        "./src/ui.js": "./src/ui.js?v=fff8582e5c"
+        "./src/analysis-ui.js": "./src/analysis-ui.js?v=93ee0eef03",
+        "./src/analysis.js": "./src/analysis.js?v=93ee0eef03",
+        "./src/arrows.js": "./src/arrows.js?v=93ee0eef03",
+        "./src/geometry.js": "./src/geometry.js?v=93ee0eef03",
+        "./src/ghost-data.js": "./src/ghost-data.js?v=93ee0eef03",
+        "./src/ghost-ui.js": "./src/ghost-ui.js?v=93ee0eef03",
+        "./src/ghost.js": "./src/ghost.js?v=93ee0eef03",
+        "./src/i18n.js": "./src/i18n.js?v=93ee0eef03",
+        "./src/icons.js": "./src/icons.js?v=93ee0eef03",
+        "./src/main.js": "./src/main.js?v=93ee0eef03",
+        "./src/panels.js": "./src/panels.js?v=93ee0eef03",
+        "./src/pieces.js": "./src/pieces.js?v=93ee0eef03",
+        "./src/sampling.js": "./src/sampling.js?v=93ee0eef03",
+        "./src/scene.js": "./src/scene.js?v=93ee0eef03",
+        "./src/selection.js": "./src/selection.js?v=93ee0eef03",
+        "./src/state.js": "./src/state.js?v=93ee0eef03",
+        "./src/theme.js": "./src/theme.js?v=93ee0eef03",
+        "./src/ui.js": "./src/ui.js?v=93ee0eef03"
       }
     }
   </script>
 </head>
 <body>
-  <aside class="sidebar">
-    <header class="brand">
-      <div>
-        <h1>DoughLab</h1>
-        <p data-i18n="brand.tagline">Oyun hamuruyla veri geometrisi</p>
+  <header class="topbar">
+    <div class="brand">
+      <h1>DoughLab</h1>
+      <p data-i18n="brand.tagline">Oyun hamuruyla veri geometrisi</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-undo" data-icon="undo" disabled><span class="label" data-i18n="top.undo">Geri al</span></button>
+      <button id="btn-redo" data-icon="redo" disabled><span class="label" data-i18n="top.redo">Yinele</span></button>
+      <span class="sep" aria-hidden="true"></span>
+      <button id="btn-share" data-icon="share"><span class="label" data-i18n="top.share">Paylaş</span></button>
+      <button id="theme-toggle" class="secondary" data-icon="auto"><span class="label" id="theme-label"></span></button>
+      <button id="lang-toggle" class="secondary" data-icon="language" data-i18n-title="lang.switch"><span class="label" id="lang-label">EN</span></button>
+      <div id="more-wrap">
+        <button id="more-toggle" data-icon="more" aria-haspopup="true" aria-expanded="false" aria-controls="more-menu"><span class="visually-hidden" data-i18n="top.more">Diğer</span></button>
+        <div class="more-menu" id="more-menu" hidden>
+          <button id="more-theme" data-icon="auto"><span id="more-theme-label"></span></button>
+          <button id="more-lang" data-icon="language"><span data-i18n="lang.switch"></span></button>
+        </div>
       </div>
-      <button id="lang-toggle" class="lang-toggle" data-i18n-title="lang.switch">EN</button>
-    </header>
+    </div>
+  </header>
+
+  <aside class="sidebar">
 
     <section class="panel">
       <h2 data-i18n="panel.add">Hamur ekle</h2>
       <div class="shape-buttons" id="shape-buttons">
-        <button data-shape="ball"><span class="ico ico-ball"></span><span data-i18n="shape.ball">Top</span></button>
-        <button data-shape="snake"><span class="ico ico-snake"></span><span data-i18n="shape.snake">Yılan</span></button>
-        <button data-shape="slab"><span class="ico ico-slab"></span><span data-i18n="shape.slab">Levha</span></button>
+        <button data-shape="ball" data-icon="ball"><span data-i18n="shape.ball">Top</span></button>
+        <button data-shape="snake" data-icon="snake"><span data-i18n="shape.snake">Yılan</span></button>
+        <button data-shape="slab" data-icon="slab"><span data-i18n="shape.slab">Levha</span></button>
       </div>
     </section>
 
@@ -107,13 +125,13 @@
     <div id="viewport"></div>
     <div class="toolbar" id="toolbar">
       <div class="toolbar-group" id="mode-buttons">
-        <button data-mode="translate" class="active" data-i18n="mode.translate">Taşı</button>
-        <button data-mode="rotate" data-i18n="mode.rotate">Döndür</button>
-        <button data-mode="scale" data-i18n="mode.scale">Ölçekle</button>
+        <button data-mode="translate" class="active" data-icon="move"><span data-i18n="mode.translate">Taşı</span></button>
+        <button data-mode="rotate" data-icon="rotate"><span data-i18n="mode.rotate">Döndür</span></button>
+        <button data-mode="scale" data-icon="scale"><span data-i18n="mode.scale">Ölçekle</span></button>
       </div>
       <div class="toolbar-group">
-        <button id="tool-duplicate" data-i18n="tool.duplicate" disabled>Çoğalt</button>
-        <button id="tool-delete" class="danger" data-i18n="tool.delete" disabled>Sil</button>
+        <button id="tool-duplicate" data-icon="duplicate" disabled><span data-i18n="tool.duplicate">Çoğalt</span></button>
+        <button id="tool-delete" class="danger" data-icon="delete" disabled><span data-i18n="tool.delete">Sil</span></button>
       </div>
     </div>
     <aside class="analysis" id="analysis">
@@ -174,6 +192,6 @@
     <div class="help" id="help"></div>
   </main>
 
-  <script type="module" src="src/main.js?v=fff8582e5c"></script>
+  <script type="module" src="src/main.js?v=93ee0eef03"></script>
 </body>
 </html>

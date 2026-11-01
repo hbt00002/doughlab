@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const HEAD = 0.35;
 const UP = new THREE.Vector3(0, 1, 0);
 
-// Text sprite, 0.4 world units tall, with a light outline so it reads on any background
+// Text sprite, 0.4 world units tall, outlined in the opposite tone so it reads on any background
 export function makeLabel(text, color) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -15,7 +15,7 @@ export function makeLabel(text, color) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineWidth = 8;
-  ctx.strokeStyle = 'rgba(255, 253, 248, 0.9)';
+  ctx.strokeStyle = new THREE.Color(color).getHSL({}).l > 0.6 ? 'rgba(17, 19, 24, 0.9)' : 'rgba(255, 255, 255, 0.9)';
   ctx.strokeText(text, canvas.width / 2, 34);
   ctx.fillStyle = color;
   ctx.fillText(text, canvas.width / 2, 34);

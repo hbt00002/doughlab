@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { mulberry32 } from './sampling.js';
 import { pca, pearson, spearman, kendall, etaSquared, linearRegression, projectedVarianceRatio } from './analysis.js';
-import { makeArrow, placeArrow } from './arrows.js';
+import { makeArrow, placeArrow, disposeArrow } from './arrows.js';
 import { t, pct } from './i18n.js';
 import { pieces, analysisState, state } from './state.js';
 import { el } from './ui.js';
-import { scene, SUN_HOME, sun } from './scene.js';
+import { scene, SUN_HOME, sun, onSceneTheme } from './scene.js';
 import { updateGhostFit } from './ghost-ui.js';
 
 // ---------------------------------------------------------------------------
@@ -14,16 +14,33 @@ import { updateGhostFit } from './ghost-ui.js';
 
 export const KENDALL_MAX_N = 1500;
 export const PLOT_MAX_POINTS = 3000;
-export const PC_COLORS = ['#1f1b16', '#7a6f62', '#b8ab97'];
+// PCA arrow colours per theme: dark ink on the light stage, light ink on the dark one
+const PC_PALETTES = {
+  light: ['#0f172a', '#475569', '#94a3b8'],
+  dark: ['#e6e9ef', '#a3acb9', '#64748b'],
+};
+export let PC_COLORS = PC_PALETTES.light;
 export const REG_COLOR = '#0f766e';
 export const AXIS_NAMES = ['x', 'y', 'z'];
 let analysisTimer = null;
 
-export const pcaAxes = PC_COLORS.map((c, i) => {
-  const axis = makeArrow(c, `PC${i + 1}`);
-  axis.group.visible = false;
-  scene.add(axis.group);
-  return axis;
+export let pcaAxes = makePcaAxes();
+
+function makePcaAxes() {
+  return PC_COLORS.map((c, i) => {
+    const axis = makeArrow(c, `PC${i + 1}`);
+    axis.group.visible = false;
+    scene.add(axis.group);
+    return axis;
+  });
+}
+
+onSceneTheme((resolved) => {
+  PC_COLORS = PC_PALETTES[resolved] ?? PC_PALETTES.light;
+  for (const a of pcaAxes) disposeArrow(a);
+  pcaAxes = makePcaAxes();
+  shadowScreen.material.color.set(resolved === 'dark' ? '#cfd6e0' : '#ffffff');
+  scheduleAnalysis();
 });
 
 // World-space coordinates of every observation in scope, its group label and the piece it came from
@@ -77,11 +94,11 @@ export function shapeVerdict(r1, r2) {
   return t('an.volumetric');
 }
 
-// Grayscale heatmap cell, like the association heatmaps from class
+// Heatmap cell in the accent blue; stronger association, deeper colour
 export function heatCell(v) {
   if (!Number.isFinite(v)) return '<td>–</td>';
   const a = Math.min(1, Math.abs(v));
-  return `<td style="background: rgba(43, 38, 32, ${(a * 0.85).toFixed(3)}); color: ${a > 0.5 ? '#fff' : 'inherit'}">${v.toFixed(2)}</td>`;
+  return `<td style="background: rgba(37, 99, 235, ${(a * 0.9).toFixed(3)}); color: ${a > 0.5 ? '#fff' : 'inherit'}">${v.toFixed(2)}</td>`;
 }
 
 export function barRow(label, value, cls = '', title = '') {
@@ -314,7 +331,7 @@ export function renderRegressionTab(box, { cols, owners, source, n }) {
 export const shadowGroup = new THREE.Group();
 export const shadowScreen = new THREE.Mesh(
   new THREE.PlaneGeometry(1, 1),
-  new THREE.MeshLambertMaterial({ color: '#fffdf8', side: THREE.DoubleSide, transparent: true, opacity: 0.88 }),
+  new THREE.MeshLambertMaterial({ color: '#ffffff', side: THREE.DoubleSide, transparent: true, opacity: 0.88 }),
 );
 shadowScreen.receiveShadow = true;
 export const shadowDots = new THREE.Points(

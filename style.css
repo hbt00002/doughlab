@@ -82,6 +82,9 @@
 
 * { box-sizing: border-box; }
 
+/* Components set their own display; the hidden attribute must still win */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   height: 100%;
@@ -700,17 +703,31 @@ button.ghost-btn:hover { background: var(--surface-3); }
 @media (max-width: 800px) {
   body {
     grid-template-columns: 1fr;
-    grid-template-rows: 52px 60vh auto;
+    grid-template-rows: 52px auto auto;
     height: auto;
     overflow: auto;
   }
   .topbar { grid-row: 1; }
-  .stage { grid-row: 2; height: 60vh; }
+  /* The 3D view keeps 60vh; the analysis panel becomes a sheet below it instead of covering it */
+  .stage { grid-row: 2; }
+  #viewport { position: relative; inset: auto; height: 60vh; }
+  .status { top: calc(60vh - 44px); bottom: auto; }
+  .toast { top: calc(60vh - 100px); bottom: auto; }
+  .empty-card { top: 30vh; }
   .sidebar { grid-row: 3; border-right: none; border-top: 1px solid var(--line); overflow: visible; }
   .brand p { display: none; }
   .help { display: none; }
   .toolbar { right: 12px; flex-wrap: wrap; }
-  .analysis { top: 76px; left: 12px; width: auto; max-height: calc(100% - 132px); }
+  .analysis {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+  }
   .topbar-actions .secondary { display: none; }
   .topbar-actions .label { display: none; }
   #more-wrap { display: block; }

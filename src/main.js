@@ -5,7 +5,7 @@ import { applySceneTheme } from './scene.js';
 import { recordChange, resetHistory, undo, redo } from './history-ui.js';
 import { restoreAutosave } from './autosave.js';
 import { shareScene, openSharedLink } from './share.js';
-import { isTouch, pieces, settings, analysisState } from './state.js';
+import { isTouch, pieces, settings, analysisState, state } from './state.js';
 import { download } from './ui.js';
 import { applyView, refreshPoints, addPiece, clearScene, exportCSV, serializeScene, loadScene, exampleScene, densityInput, setDensity } from './pieces.js';
 import { deleteSelection, setMode, duplicateSelected } from './selection.js';
@@ -40,7 +40,17 @@ const analysisToggle = document.getElementById('analysis-toggle');
 function setAnalysisCollapsed(collapsed) {
   analysisPanel.classList.toggle('collapsed', collapsed);
   analysisToggle.textContent = collapsed ? t('analysis.show') : t('analysis.hide');
+  analysisToggle.setAttribute('aria-expanded', !collapsed);
 }
+
+// Touch: a toggle stands in for the Shift key
+const multiButton = document.getElementById('tool-multi');
+multiButton.hidden = !isTouch;
+multiButton.addEventListener('click', () => {
+  state.multiSelect = !state.multiSelect;
+  multiButton.setAttribute('aria-pressed', state.multiSelect);
+  multiButton.classList.toggle('active', state.multiSelect);
+});
 analysisToggle.addEventListener('click', () => setAnalysisCollapsed(!analysisPanel.classList.contains('collapsed')));
 if (window.matchMedia('(max-width: 800px)').matches) setAnalysisCollapsed(true);
 

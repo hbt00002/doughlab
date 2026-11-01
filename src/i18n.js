@@ -111,6 +111,7 @@ export const STRINGS = {
     'mode.shortcut': 'Kısayol: {key}',
     'tool.duplicate': 'Çoğalt',
     'tool.delete': 'Sil',
+    'tool.multi': 'Çoklu seç',
 
     'help.mouse': 'Tık: seç · Shift+tık / Shift+sürükle: çoklu seç · Ctrl+G: grupla · Sürükle: kamerayı döndür · Sağ sürükle: kaydır · Tekerlek: yakınlaş · W/E/R: taşı/döndür/ölçekle · Del: sil · Ctrl+D: çoğalt',
     'help.touch': 'Dokun: seç · Tek parmak: döndür · İki parmak: yakınlaş / kaydır',
@@ -329,6 +330,7 @@ export const STRINGS = {
     'mode.shortcut': 'Shortcut: {key}',
     'tool.duplicate': 'Duplicate',
     'tool.delete': 'Delete',
+    'tool.multi': 'Multi-select',
 
     'help.mouse': 'Click: select · Shift+click / Shift+drag: multi-select · Ctrl+G: group · Drag: orbit · Right drag: pan · Wheel: zoom · W/E/R: move/rotate/scale · Del: delete · Ctrl+D: duplicate',
     'help.touch': 'Tap: select · One finger: orbit · Two fingers: zoom / pan',

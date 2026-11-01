@@ -38,7 +38,7 @@ export function renderList() {
       row.append(el('span', { class: 'link-badge', title: t('list.linked', { n }) }, `G${n}`));
     }
     row.append(el('span', { class: 'pmeta' }, t('list.points', { n: p.count })));
-    row.addEventListener('click', (e) => (e.shiftKey ? toggleSelection(p) : select(p)));
+    row.addEventListener('click', (e) => (e.shiftKey || state.multiSelect ? toggleSelection(p) : select(p)));
     list.append(row);
   }
 }

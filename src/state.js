@@ -39,4 +39,6 @@ export const state = {
   selected: null,
   // Pieces grouped with Ctrl+G share a link id, so they are selected and moved together
   linkCounter: 0,
+  // Touch screens have no Shift key: while on, a tap adds or removes a piece like Shift+click
+  multiSelect: false,
 };

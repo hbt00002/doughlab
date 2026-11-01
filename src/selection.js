@@ -152,7 +152,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (moved > (e.pointerType === 'mouse' ? 4 : 10) || gizmo.dragging || gizmo.axis) return;
   rayFromEvent(e);
   const hit = raycaster.intersectObjects(pieces.map((p) => p.mesh), false)[0]?.object.userData.piece;
-  if (e.shiftKey) {
+  if (e.shiftKey || state.multiSelect) {
     if (hit) toggleSelection(hit);
   } else select(hit ?? null);
   // There is no hover on a touch screen, so a tap on a ghost point shows its row instead

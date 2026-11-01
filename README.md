@@ -87,9 +87,17 @@ DoughLab, bir veri bilimi dersindeki ödevden doğdu: Gapminder verisinin 3B PCA
 - Bir noktanın **üzerine gelince** o satırın değerleri görünür.
 - **Hamur uyumu:** *kapsama* ve *taşma* skorları, hamur modelinin veriye ne kadar iyi oturduğunu ölçer.
 
+### Çalışmanı koru ve paylaş
+- **Geri al / yinele:** Son 100 adım. Bir kaydırıcıyı sürüklemek tek adım sayılır.
+- **Otomatik kayıt:** Sahne ve Gapminder hayaleti tarayıcına kaydedilir; sayfayı yenileyince geri gelir.
+- **Paylaş:** Sahne, kopyalanan bağlantının içine sıkıştırılarak gömülür. Bağlantıyı açan kişi aynı sahneyi (Gapminder hayaletiyle birlikte) görür.
+
 ### Arayüz
-- **Türkçe ve İngilizce** arayüz. Sol üstteki **EN / TR** düğmesiyle değiştir; seçim tarayıcıda hatırlanır. Bağlantıya `?lang=en` ekleyerek de açabilirsin.
-- **Dokunmatik ekran desteği:** dokunarak seçme, araç çubuğunda **Çoğalt / Sil** düğmeleri, parmakla tutması kolay büyük tutamaçlar ve hayalet noktasına dokununca satır bilgisi.
+- **Türkçe ve İngilizce** arayüz. Sağ üstteki **EN / TR** düğmesiyle değiştir; seçim tarayıcıda hatırlanır. Bağlantıya `?lang=en` ekleyerek de açabilirsin.
+- **Açık ve koyu tema:** Varsayılan olarak bilgisayarının ayarını izler; üst çubuktaki tema düğmesiyle değiştirilebilir.
+- **Hayalet veri analizi:** Analiz panelinde **Hayalet veri** kapsamı seçilince PCA ve gölge doğrudan yüklenen veride çalışır; regresyon CSV'nin kendi sütunlarında kurulur (ör. lifeExp ← year, log(gdpPercap)).
+- **Dokunmatik ekran:** Dokunarak seçme, **Çoklu seç** düğmesi, araç çubuğunda **Çoğalt / Sil**, büyük tutamaçlar ve hayalet noktasına dokununca satır bilgisi. Telefonda analiz paneli sahnenin altına yerleşir.
+- **Erişilebilirlik:** Tüm arayüz klavyeyle kullanılabilir, ekran okuyucular düğmeleri ve analiz sonuçlarını okur, renk kontrastı WCAG 2.1 AA düzeyindedir. Seçili parçanın konumu, dönüşü ve ölçeği sayıyla da girilebilir.
 
 ## Hızlı başlangıç
 
@@ -147,6 +155,11 @@ Ardından tarayıcıda `http://localhost:8000` adresine git.
 | Seçili parçaları sil | `Delete` veya `Backspace` |
 | Seçili parçaları çoğalt | `Ctrl` + `D` |
 | Seçimi kaldır | `Esc` |
+| Geri al | `Ctrl` + `Z` |
+| Yinele | `Ctrl` + `Shift` + `Z` veya `Ctrl` + `Y` |
+| Seçiliyi kaydır (sahne odaktayken) | Ok tuşları (`Shift` ile 10 kat) |
+| Seçiliyi yukarı / aşağı taşı | `Page Up` / `Page Down` |
+| Analiz sekmeleri arasında geç | Sekme odaktayken ← / → |
 
 ### Dokunmatik ekran
 
@@ -157,7 +170,14 @@ Ardından tarayıcıda `http://localhost:8000` adresine git.
 | Yakınlaş / kaydır | İki parmak |
 | Taşı / döndür / ölçekle | Üstteki araç çubuğu ve tutamaçlar |
 | Çoğalt / sil | Araç çubuğundaki **Çoğalt** / **Sil** |
+| Birden fazla parça seç | **Çoklu seç** düğmesini aç, sonra parçalara dokun |
 | Hayalet satırını gör | Hayalet noktasına dokun |
+
+### Gizlilik
+
+- Otomatik kayıt yalnızca senin tarayıcında durur; hiçbir sunucuya gönderilmez.
+- Paylaşım bağlantısı sahneyi adresin `#` işaretinden sonraki kısmında taşır. Bu kısım tarayıcıdan sunucuya hiç gönderilmez.
+- Kendi yüklediğin CSV dosyası ne kaydedilir ne de bağlantıya eklenir.
 
 ## Hamur ve veri karşılıkları
 
@@ -262,18 +282,36 @@ sns.pairplot(df, vars=["x", "y", "z"], hue="group")
 Derleme adımı yoktur. Tüm kod tarayıcıda doğrudan çalışan ES modüllerinden oluşur.
 
 ```
-index.html          Arayüz iskeleti
-style.css           Stiller
+index.html          Arayüz iskeleti (import map'teki sürüm damgalarıyla)
+style.css           Tasarım değişkenleri, açık ve koyu tema
+fonts/              Lexend (OFL lisanslı)
 src/
-  main.js           Sahne, parçalar, arayüz, analiz sekmeleri, dışa aktarma
+  main.js           Başlangıç ve düğme bağlantıları
+  state.js          Paylaşılan durum
+  scene.js          Three.js sahnesi, kamera, ışıklar, tema renkleri
+  pieces.js         Parçalar, sahne dosyası, CSV dışa aktarma
+  selection.js      Seçim, kutu seçimi, gruplama, gizmo, klavye
+  panels.js         Parça listesi, seçili parça paneli, başlangıç kartı
+  analysis-ui.js    Analiz paneli: PCA, regresyon ve gölge sekmeleri
+  ghost-ui.js       Hayalet veri paneli, uyum skoru, satır bilgisi
+  history.js        Geri al / yinele geçmişi (DOM'suz)
+  history-ui.js     Geçmişin sahneye bağlanması
+  storage.js        Tarayıcı kaydı ve paylaşım bağlantısı kodlaması (DOM'suz)
+  autosave.js       Otomatik kayıt
+  share.js          Paylaş düğmesi ve bağlantıyla açılış
+  theme.js          Açık / koyu tema
+  icons.js          SVG ikonlar
+  ui.js             DOM yardımcıları, bildirimler, ekran okuyucu duyuruları
   i18n.js           Türkçe ve İngilizce arayüz metinleri
+  analysis.js       PCA, korelasyonlar, η², regresyon, projeksiyon (DOM'suz)
+  ghost-data.js     CSV okuma, hayalet PCA'sı, uyum skoru (DOM'suz)
+  ghost.js          Hayalet nokta bulutu ve değişken okları
   geometry.js       Hamur geometrileri, bükme, yüzey dokusu
   sampling.js       Parça içinden nokta örnekleme
-  analysis.js       PCA, Pearson, Spearman, Kendall, η², regresyon, projeksiyon
-  ghost-data.js     CSV okuma, hayalet PCA'sı, uyum skoru (Three.js'siz)
-  ghost.js          Hayalet nokta bulutu ve değişken okları
   arrows.js         Etiketli 3B oklar
-docs/               README görselleri
+tests/              node:test testleri
+tools/              stamp-version.mjs (sürüm damgası)
+docs/               README görselleri, tasarım ve plan belgeleri
 ```
 
 ## Yol haritası
@@ -284,6 +322,10 @@ docs/               README görselleri
 - [x] Regresyon düzlemi ve residual grafiği
 - [x] İngilizce arayüz seçeneği
 - [x] Dokunmatik ekran iyileştirmeleri
+- [x] Geri al / yinele, otomatik kayıt ve paylaşım bağlantısı
+- [x] Koyu tema ve erişilebilirlik (WCAG 2.1 AA)
+- [ ] Dokunmatik ekranda kutu ile seçim
+- [ ] Geri al geçmişinin sayfa yenilense de korunması
 
 ## Katkı
 
@@ -292,6 +334,12 @@ Katkılar memnuniyetle karşılanır.
 - Hata bildirmek ya da öneride bulunmak için bir [issue](https://github.com/hbt00002/doughlab/issues) aç.
 - Kod değişikliği için depoyu *fork*'la, ayrı bir dalda çalış ve bir *pull request* gönder.
 - Mevcut kod stiline uy. Proje bilinçli olarak derleme adımı ve bağımlılık yöneticisi olmadan tutuluyor.
+
+### Sürüm yayınlama
+
+1. Testleri çalıştır: `node --test "tests/**/*.test.mjs"`
+2. Sürüm damgasını güncelle: `node tools/stamp-version.mjs`. Bu komut `index.html`'deki tüm modül ve stil adreslerine yeni bir `?v=` damgası yazar; böylece tarayıcılar eski ve yeni dosyaları karıştırmaz. Damga unutulursa testlerden biri hata verir.
+3. Commit et ve push'la. GitHub Actions testleri her push'ta yeniden çalıştırır.
 
 ## Lisans ve teşekkür
 

@@ -19,7 +19,7 @@ Sculpt 3D shapes from virtual dough in your browser and turn them into datasets,
 
 </div>
 
-> **Note:** The interface is available in English and Turkish. Switch with the **EN / TR** button in the top-left corner, or open the app with [`?lang=en`](https://hbt00002.github.io/doughlab/?lang=en).
+> **Note:** The interface is available in English and Turkish. Switch with the **EN / TR** button in the top-right corner, or open the app with [`?lang=en`](https://hbt00002.github.io/doughlab/?lang=en).
 
 ## Contents
 
@@ -89,9 +89,17 @@ DoughLab grew out of a data science course assignment: model the 3D PCA plot of 
 - **Hover** over a point to see its row.
 - **Dough fit:** *coverage* and *spill* scores measure how well your dough model matches the data.
 
+### Keep and share your work
+- **Undo / redo:** the last 100 steps. Dragging a slider counts as one step.
+- **Autosave:** the scene and the Gapminder ghost are saved in your browser and come back after a reload.
+- **Share:** the scene is compressed into the copied link. Whoever opens it sees the same scene, Gapminder ghost included.
+
 ### Interface
-- **English and Turkish** interface. Switch with the **EN / TR** button; the choice is remembered in the browser. You can also add `?lang=en` to the link.
-- **Touch screen support:** tap to select, **Duplicate / Delete** buttons in the toolbar, bigger handles that are easy to grab with a finger, and tap a ghost point to see its row.
+- **English and Turkish** interface. Switch with the **EN / TR** button in the top bar; the choice is remembered in the browser. You can also add `?lang=en` to the link.
+- **Light and dark theme:** follows your system setting by default; the theme button in the top bar overrides it.
+- **Analysis on the ghost data:** choose the **Ghost data** scope in the Analysis panel. PCA and the shadow then run on the loaded data, and the regression uses the CSV's own columns (e.g. lifeExp ← year, log(gdpPercap)).
+- **Touch screens:** tap to select, a **Multi-select** toggle, **Duplicate / Delete** in the toolbar, big handles, and tap a ghost point to see its row. On phones the analysis panel sits below the scene.
+- **Accessibility:** the whole interface works with a keyboard, screen readers read the buttons and the analysis results, and colour contrast meets WCAG 2.1 AA. The selected piece's position, rotation and scale can also be typed in.
 
 ## Quick start
 
@@ -149,6 +157,11 @@ Then open `http://localhost:8000`.
 | Delete selected pieces | `Delete` or `Backspace` |
 | Duplicate selected pieces | `Ctrl` + `D` |
 | Clear selection | `Esc` |
+| Undo | `Ctrl` + `Z` |
+| Redo | `Ctrl` + `Shift` + `Z` or `Ctrl` + `Y` |
+| Nudge the selection (scene focused) | Arrow keys (`Shift` for 10×) |
+| Move the selection up / down | `Page Up` / `Page Down` |
+| Switch analysis tabs | ← / → with a tab focused |
 
 ### Touch screen
 
@@ -159,7 +172,14 @@ Then open `http://localhost:8000`.
 | Zoom / pan | Two fingers |
 | Move / rotate / scale | Toolbar at the top and the handles |
 | Duplicate / delete | **Duplicate** / **Delete** in the toolbar |
+| Select several pieces | Turn on **Multi-select**, then tap pieces |
 | See a ghost row | Tap a ghost point |
+
+### Privacy
+
+- Autosave stays in your own browser and is never sent anywhere.
+- A share link carries the scene in the part of the address after `#`, which browsers never send to a server.
+- Your own CSV file is neither stored nor included in links.
 
 ## Dough-to-data mapping
 
@@ -264,18 +284,36 @@ sns.pairplot(df, vars=["x", "y", "z"], hue="group")
 There is no build step. Everything runs in the browser as plain ES modules.
 
 ```
-index.html          UI skeleton
-style.css           Styles
+index.html          UI skeleton (with version stamps in the import map)
+style.css           Design tokens, light and dark theme
+fonts/              Lexend (OFL licence)
 src/
-  main.js           Scene, pieces, UI, analysis tabs, export
+  main.js           Startup and button wiring
+  state.js          Shared state
+  scene.js          Three.js scene, camera, lights, theme colours
+  pieces.js         Pieces, scene files, CSV export
+  selection.js      Selection, box select, grouping, gizmo, keyboard
+  panels.js         Piece list, selected-piece panel, start card
+  analysis-ui.js    Analysis panel: PCA, regression and shadow tabs
+  ghost-ui.js       Ghost data panel, fit score, row tooltip
+  history.js        Undo / redo history (no DOM)
+  history-ui.js     Connects the history to the scene
+  storage.js        Browser storage and share-link encoding (no DOM)
+  autosave.js       Autosave
+  share.js          Share button and opening shared links
+  theme.js          Light / dark theme
+  icons.js          SVG icons
+  ui.js             DOM helpers, toasts, screen-reader announcements
   i18n.js           English and Turkish interface strings
+  analysis.js       PCA, correlations, η², regression, projection (no DOM)
+  ghost-data.js     CSV parsing, ghost PCA, fit score (no DOM)
+  ghost.js          Ghost point cloud and variable arrows
   geometry.js       Dough geometry, bending, surface texture
   sampling.js       Point sampling inside pieces
-  analysis.js       PCA, Pearson, Spearman, Kendall, η², regression, projection
-  ghost-data.js     CSV parsing, ghost PCA, fit score (no Three.js)
-  ghost.js          Ghost point cloud and variable arrows
   arrows.js         Labelled 3D arrows
-docs/               README images
+tests/              node:test tests
+tools/              stamp-version.mjs (version stamp)
+docs/               README images, design and plan documents
 ```
 
 ## Roadmap
@@ -286,6 +324,10 @@ docs/               README images
 - [x] Regression plane and residual plot
 - [x] English interface
 - [x] Touch screen improvements
+- [x] Undo / redo, autosave and share links
+- [x] Dark theme and accessibility (WCAG 2.1 AA)
+- [ ] Box selection on touch screens
+- [ ] Keep the undo history across reloads
 
 ## Contributing
 
@@ -294,6 +336,12 @@ Contributions are welcome.
 - Open an [issue](https://github.com/hbt00002/doughlab/issues) to report a bug or suggest an idea.
 - For code changes, fork the repository, work on a separate branch and open a pull request.
 - Follow the existing code style. The project intentionally has no build step and no package manager.
+
+### Releasing
+
+1. Run the tests: `node --test "tests/**/*.test.mjs"`
+2. Update the version stamp: `node tools/stamp-version.mjs`. It writes a new `?v=` stamp onto every module and stylesheet address in `index.html`, so browsers never mix old and new files. A test fails if the stamp is forgotten.
+3. Commit and push. GitHub Actions runs the tests again on every push.
 
 ## License and acknowledgements
 

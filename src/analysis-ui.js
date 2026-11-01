@@ -382,7 +382,7 @@ function renderGhostPcaTab(box, ghost) {
     const [pc1, pc3, pc2] = l.dir;
     html += `<tr><td class="pair">${escapeHtml(l.name)}</td>${heatCell(pc1)}${heatCell(pc2)}${heatCell(pc3)}</tr>`;
   }
-  html += `</table><p class="note">${t('an.loadings')}</p>`;
+  html += `</table><p class="note">${t('an.ghostLoadingsNote')}</p>`;
   box.innerHTML = html;
 }
 

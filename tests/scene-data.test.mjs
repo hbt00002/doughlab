@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeScene } from '../src/scene-data.js';
+import { nextPieceNumber, normalizeScene } from '../src/scene-data.js';
 
 const SHAPE_PARAMS = { ball: ['radius'], snake: ['length', 'radius', 'curvature'] };
 
@@ -65,4 +65,12 @@ test('keeps valid fields as they are', () => {
 test('ignores a density that is not a sensible number', () => {
   assert.equal(normalizeScene({ app: 'doughlab', density: 'x', pieces: [] }, SHAPE_PARAMS).density, undefined);
   assert.equal(normalizeScene({ app: 'doughlab', density: -5, pieces: [] }, SHAPE_PARAMS).density, undefined);
+});
+
+test('a new piece number continues after the highest existing one', () => {
+  const labels = ['Top', 'Ball'];
+  assert.equal(nextPieceNumber(['Top 1', 'Top 3'], labels, 2), 4);
+  assert.equal(nextPieceNumber(['Ball 7', 'Yılan 9'], labels, 0), 8);
+  assert.equal(nextPieceNumber(['Ülke', 'Top 2 kopyası', 'Topçu 5'], labels, 0), 1);
+  assert.equal(nextPieceNumber([], labels, 5), 6);
 });

@@ -31,3 +31,15 @@ export function normalizeScene(data, shapeParams) {
   const density = isNum(data.density) && data.density > 0 ? data.density : undefined;
   return { density, pieces };
 }
+
+// Number for the next default-named piece ("Top 4"): one past both the running counter and the
+// highest number already in use, so pieces loaded from a file or brought back by undo are never
+// named twice. labels: the shape's name in every language, since a scene may mix them.
+export function nextPieceNumber(names, labels, counter) {
+  let highest = counter;
+  for (const name of names) {
+    const m = /^(.+) (\d+)$/.exec(name);
+    if (m && labels.includes(m[1])) highest = Math.max(highest, parseInt(m[2], 10));
+  }
+  return highest + 1;
+}

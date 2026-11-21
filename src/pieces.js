@@ -1,4 +1,4 @@
-import { normalizeScene } from './scene-data.js';
+import { nextPieceNumber, normalizeScene } from './scene-data.js';
 import { recordChange } from './history-ui.js';
 import * as THREE from 'three';
 import { buildGeometry, pieceVolume } from './geometry.js';
@@ -68,7 +68,9 @@ export function setVec(target, value) {
 }
 
 export function createPiece(type, opts = {}) {
-  typeCounters[type]++;
+  if (opts.name === undefined) {
+    typeCounters[type] = nextPieceNumber(pieces.map((p) => p.name), tAll(`shape.${type}`), typeCounters[type]);
+  }
   const color = opts.color ?? COLORS[pieces.length % COLORS.length].hex;
   const piece = {
     type,
